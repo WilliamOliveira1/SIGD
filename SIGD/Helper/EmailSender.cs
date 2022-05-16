@@ -20,12 +20,10 @@ namespace SIGD.Helper
         {
             
             SIGDLiteDBHelper liteDBHelper = new SIGDLiteDBHelper();
-
             SMTPConfigData config = liteDBHelper.GetSMPTConfigData();
             SecureString secureCertPass = new SecureString();
             CovertByteToString(config.CertPassword).ToCharArray().ToList().ForEach(p => secureCertPass.AppendChar(p));
             X509Certificate2 certificate = LoadCert($"{config.CertName}.pfx", secureCertPass);
-            byte[] decryptedPass = DecryptDataOaepSha1(certificate, config.Password);
 
             SmtpClient smtpClient = new SmtpClient()
             {
@@ -37,7 +35,7 @@ namespace SIGD.Helper
                 Credentials = new NetworkCredential()
                 {
                     UserName = config.Email,
-                    Password = CovertByteToString(decryptedPass)
+                    Password = CovertByteToString(DecryptDataOaepSha1(certificate, config.Password))
                 }
             };
 

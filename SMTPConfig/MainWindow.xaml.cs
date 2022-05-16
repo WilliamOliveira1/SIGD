@@ -46,7 +46,7 @@ namespace SMTPConfig
             CreateCert createCert = new CreateCert();
             CertPassword.Password.ToString().ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
             bool isCertCreated = createCert.CreateCertificate(certName, securePassword);
-            X509Certificate2 cert = LoadCert(securePassword);
+            X509Certificate2 cert = LoadCert(certName, securePassword);
             byte[] encryptPass = EncryptDataOaepSha1(cert, data);            
             
 
@@ -97,13 +97,19 @@ namespace SMTPConfig
             }
         }
 
-        private X509Certificate2 LoadCert(SecureString pass)
+        /// <summary>
+        /// Load a certificate
+        /// </summary>
+        /// <param name="certName">certificate file name</param>
+        /// <param name="pass">secure string password</param>
+        /// <returns>X509Certificate2 certificate</returns>
+        private X509Certificate2 LoadCert(string certName, SecureString pass)
         {
             X509Certificate2 x509 = new X509Certificate2();
             try
             {
                 string certPath = System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)), "SGID");
-                x509 = new X509Certificate2(File.ReadAllBytes(System.IO.Path.Combine(certPath, "SIGD.pfx")), pass);
+                x509 = new X509Certificate2(File.ReadAllBytes(System.IO.Path.Combine(certPath, $"{certName}.pfx")), pass);
             }
             catch (Exception ex)
             {
@@ -112,18 +118,30 @@ namespace SMTPConfig
             return x509;
         }
 
+        /// <summary>
+        /// Encrypt an byte array using an certificate
+        /// </summary>
+        /// <param name="cert">certificate</param>
+        /// <param name="data">data bayte array</param>
+        /// <returns>Encrypted byte array</returns>
         public byte[] EncryptDataOaepSha1(X509Certificate2 cert, byte[] data)
-        {
-            // GetRSAPublicKey returns an object with an independent lifetime, so it should be
-            // handled via a using statement.
-            using (RSA rsa = cert.GetRSAPublicKey())
+        {            
+            try
             {
-                // OAEP allows for multiple hashing algorithms, what was formermly just "OAEP" is
-                // now OAEP-SHA1.
-                byte[] value = rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
-                // string encrypitedPassword = Encoding.ASCII.GetString(value)
-                return value;
+                // GetRSAPublicKey returns an object with an independent lifetime, so it should be
+                // handled via a using statement.
+                using (RSA rsa = cert.GetRSAPublicKey())
+                {
+                    // OAEP allows for multiple hashing algorithms, what was formermly just "OAEP" is
+                    // now OAEP-SHA1.
+                    return rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocorreu um erro ao salvar os dados: {ex.Message}", "Erro");
+                throw ex;
+            }            
         }       
     }
 }

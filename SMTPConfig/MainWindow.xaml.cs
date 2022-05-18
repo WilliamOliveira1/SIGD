@@ -119,10 +119,10 @@ namespace SMTPConfig
         }
 
         /// <summary>
-        /// Encrypt a byte array using an certificate
+        /// Encrypt a byte array using a certificate
         /// </summary>
         /// <param name="cert">certificate</param>
-        /// <param name="data">data bayte array</param>
+        /// <param name="data">byte array data</param>
         /// <returns>Encrypted byte array</returns>
         public byte[] EncryptDataOaepSha1(X509Certificate2 cert, byte[] data)
         {            

@@ -13,6 +13,10 @@ namespace SIGD.Helper
         public static string liteDBpath = Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)), "SGID");
         public string liteDBFilepath = Path.Combine(liteDBpath, "SIGD.db");
 
+        /// <summary>
+        /// Load data from liteDB
+        /// </summary>
+        /// <returns>SMTP Configuration Data</returns>
         public SMTPConfigData GetSMPTConfigData()
         {
             SMTPConfigData config = new SMTPConfigData();

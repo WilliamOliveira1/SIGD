@@ -16,6 +16,11 @@ namespace SIGD.Helper
 {
     public class EmailSender
     {
+        /// <summary>
+        /// Send email with first access password
+        /// </summary>
+        /// <param name="emailAdressTo">email address</param>
+        /// <param name="mailBody">HTML with the email body</param>
         public void SendEmail(string emailAdressTo, string mailBody)
         {
             
@@ -68,11 +73,22 @@ namespace SIGD.Helper
             }
         }
 
+        /// <summary>
+        /// Convert byte array to string
+        /// </summary>
+        /// <param name="value">byte array data</param>
+        /// <returns>String</returns>
         static string CovertByteToString(byte[] value)
         {
             return Encoding.ASCII.GetString(value);
         }
 
+        /// <summary>
+        /// Decripty an array of bytes
+        /// </summary>
+        /// <param name="cert">X509Certificate2 certificate</param>
+        /// <param name="data">encripted data</param>
+        /// <returns>decripted data</returns>
         public byte[] DecryptDataOaepSha1(X509Certificate2 cert, byte[] data)
         {
             try
@@ -90,6 +106,12 @@ namespace SIGD.Helper
             }            
         }
 
+        /// <summary>
+        /// Load certificate data
+        /// </summary>
+        /// <param name="certName">certificate path</param>
+        /// <param name="certPass">certificate password</param>
+        /// <returns>X509Certificate2 certificate</returns>
         private X509Certificate2 LoadCert(string certName, SecureString certPass)
         {
             X509Certificate2 certificate = new X509Certificate2();

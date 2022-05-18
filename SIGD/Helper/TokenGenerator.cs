@@ -12,6 +12,10 @@ namespace SIGD.Helper
         private const string specialChars = "!”#$%&'()*+,-./:;<=>?@[\\]^_`{|}~.";
         private const string numbers = "0123456789";
 
+        /// <summary>
+        /// Create a random token for first connection password
+        /// </summary>
+        /// <returns>random token</returns>
         public string GetToken()
         {
             string allChar = string.Join(upperChars, LowerChars, specialChars, numbers);

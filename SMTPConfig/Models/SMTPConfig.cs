@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SMTPConfig.Models
 {
+    /// <summary>
+    /// SMTP Configuration Data model
+    /// </summary>
     public class SMTPConfigData
     {
         public int Id { get; set; }

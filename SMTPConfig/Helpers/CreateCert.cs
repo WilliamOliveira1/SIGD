@@ -9,6 +9,13 @@ namespace SMTPConfig.Helpers
 {
     public class CreateCert
     {
+        /// <summary>
+        /// Export certificate file
+        /// </summary>
+        /// <param name="certName">X509Certificate2 certificate</param>
+        /// <param name="pass">password</param>
+        /// <returns>true if certificate was created</returns>
+        /// <returns>false otherwise</returns>
         public bool CreateCertificate(string certName, SecureString pass)
         {
             try
@@ -48,6 +55,11 @@ namespace SMTPConfig.Helpers
             }
         }
 
+        /// <summary>
+        /// Create a certificate
+        /// </summary>
+        /// <param name="certName"></param>
+        /// <returns>X509Certificate2 certificate</returns>
         private static X509Certificate2 GenerateRsaCertificate(string certName)
         {
             var hashAlgorithm = HashAlgorithmName.SHA256;
@@ -58,6 +70,12 @@ namespace SMTPConfig.Helpers
             return certificate;
         }
 
+        /// <summary>
+        /// Create the certificate and liteDB file folder
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns>True if the folder was created</returns>
+        /// <returns>False otherwise</returns>
         public bool CreateLiteDBFolder(string folderPath)
         {
             bool isCreated = false;
@@ -100,6 +118,13 @@ namespace SMTPConfig.Helpers
             dInfo.SetAccessControl(dSecurity);
         }
 
+        /// <summary>
+        /// Remove 
+        /// </summary>
+        /// <param name="FileName"></param>
+        /// <param name="Account"></param>
+        /// <param name="Rights"></param>
+        /// <param name="ControlType"></param>
         public static void RemoveDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
         {
             // Create a new DirectoryInfo object.

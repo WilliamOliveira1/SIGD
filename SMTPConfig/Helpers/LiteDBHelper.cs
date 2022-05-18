@@ -12,6 +12,13 @@ namespace SMTPConfig
     {
         public static string liteDBpath = Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)), "SGID");
         public string liteDBFilepath = Path.Combine(liteDBpath, "SIGD.db");
+
+        /// <summary>
+        /// Save the STMPConfigData table
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns>true if saved</returns>
+        /// <returns>false otherwise</returns>
         public bool Save(SMTPConfigData config)
         {
             bool isSaved = false;
@@ -35,6 +42,12 @@ namespace SMTPConfig
             return isSaved;
         }
 
+        /// <summary>
+        /// Update the STMPConfigData table
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns>true if updated</returns>
+        /// <returns>false otherwise</returns>
         public bool UpdateSMPTConfigData(SMTPConfigData config)
         {
             bool isSaved = false;
@@ -50,6 +63,10 @@ namespace SMTPConfig
             return isSaved;
         }
 
+        /// <summary>
+        /// Load data from liteDB
+        /// </summary>
+        /// <returns>SMTP Configuration Data</returns>
         public SMTPConfigData GetSMPTConfigData()
         {
             SMTPConfigData config = new SMTPConfigData();

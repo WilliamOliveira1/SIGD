@@ -119,7 +119,7 @@ namespace SMTPConfig
         }
 
         /// <summary>
-        /// Encrypt an byte array using an certificate
+        /// Encrypt a byte array using an certificate
         /// </summary>
         /// <param name="cert">certificate</param>
         /// <param name="data">data bayte array</param>

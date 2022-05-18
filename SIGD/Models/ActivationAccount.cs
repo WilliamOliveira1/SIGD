@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace SIGD.Models
 {
+    /// <summary>
+    /// Activation Account model
+    /// </summary>
     public class ActivationAccount
     {
         public int Id { get; set; }

@@ -100,6 +100,13 @@ namespace SMTPConfig.Helpers
             return isCreated;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="FileName"></param>
+        /// <param name="Account"></param>
+        /// <param name="Rights"></param>
+        /// <param name="ControlType"></param>
         public static void AddDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
         {
             // Create a new DirectoryInfo object.

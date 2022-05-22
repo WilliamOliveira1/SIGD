@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using SIGD.Data;
 using SIGD.Helper;
 using SIGD.Models;
+using SIGD.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +19,31 @@ namespace SIGD.Controllers.API
     {
         private readonly ApplicationDbContext _context;
 
-        public RegisterAPIController(ApplicationDbContext context)
+        [HttpPost("newregister")]
+        public IActionResult NewRegister([FromBody] ActivationAccount activationAccount)
         {
-            _context = context;
+            RegisterLoginService registerLoginService = new RegisterLoginService(_context);
+
+            if (activationAccount != null)
+            {
+
+                registerLoginService.CreateNewAdminUSer(activationAccount);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
-        [HttpPost("newregister")]
-        public IActionResult GetClientList([FromBody] ActivationAccount activationAccount)
+        [HttpPost("newschoolregister")]
+        public IActionResult NewSchoolRegister([FromBody] ActivationAccount activationAccount)
         {
             EmailSender emailSender = new EmailSender();
 
             if (activationAccount != null)
             {
-                emailSender.SendEmail(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
+                emailSender.SendEmail(activationAccount.Email, "",$"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
                 return Ok();
             }
             else

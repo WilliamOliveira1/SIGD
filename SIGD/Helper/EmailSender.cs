@@ -21,7 +21,7 @@ namespace SIGD.Helper
         /// </summary>
         /// <param name="emailAdressTo">email address</param>
         /// <param name="mailBody">HTML with the email body</param>
-        public void SendEmail(string emailAdressTo, string mailBody)
+        public void SendEmail(string emailAdressTo, string tokenFirstAccess,string mailBody)
         {
             
             SIGDLiteDBHelper liteDBHelper = new SIGDLiteDBHelper();
@@ -50,8 +50,7 @@ namespace SIGD.Helper
             MailAddress emailFrom = new MailAddress(emailAdressFrom, displayNameFrom);
             MailAddress emailTo = new MailAddress(emailAdressTo);
 
-            TokenGenerator tokenGenerator = new TokenGenerator();
-            mailBody = "<h1>" + mailBody + " " +  tokenGenerator.GetToken() + "</h1>";
+            mailBody = "<h1>" + mailBody + " " + tokenFirstAccess + "</h1>";
 
             MailMessage mailMessage = new MailMessage()
             {

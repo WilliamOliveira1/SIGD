@@ -8,12 +8,29 @@ function clientList(username, email) {
         'username': username,
         'email': email
     };
+    let apiPath = BaseApiUrl() + "/api/register/registernew";
 
     return new Promise(function (resolve, reject) {
         $.post({
-            url: BaseApiUrl() + "/api/register/newregister",
+            url: apiPath,
             data: JSON.stringify(parameters),
             dataType: 'json',
+            contentType: 'application/json'
+        })
+            .done(function (response) {
+                resolve(response);
+                alertResponse(response);
+            })
+            .fail(function (response) {
+                reject(response)
+            })
+    })
+}
+
+function list() {
+    return new Promise(function (resolve, reject) {
+        $.get({
+            url: BaseApiUrl() + "/api/register/list",
             contentType: 'application/json'
         })
             .done(function (response) {
@@ -31,6 +48,7 @@ $('#RegisterSubmit').click(function () {
     let email = document.getElementById('InputEmail').value;
 
     clientList(username, email);
+    //list();
 });
 
 function BaseApiUrl() {

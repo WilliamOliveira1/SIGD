@@ -23,7 +23,6 @@ namespace SIGD.Models
         public string UserName { get; set; }
         [Required]
         public string Email { get; set; }
-        [Required]
         public string password { get; set; }
         public DateTime passwordExpiration { get; set; }
         public bool IsActivated { get; set; }

@@ -18,37 +18,61 @@ namespace SIGD.Controllers.API
     public class RegisterAPIController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        [HttpPost("newregister")]
-        public IActionResult NewRegister([FromBody] ActivationAccount activationAccount)
+        public RegisterAPIController(ApplicationDbContext context)
         {
-            RegisterLoginService registerLoginService = new RegisterLoginService(_context);
-
-            if (activationAccount != null)
-            {
-
-                registerLoginService.CreateNewAdminUSer(activationAccount);
-                return Ok();
-            }
-            else
-            {
-                return BadRequest();
-            }
+            _context = context;
         }
 
-        [HttpPost("newschoolregister")]
-        public IActionResult NewSchoolRegister([FromBody] ActivationAccount activationAccount)
+        [HttpPost("registernew")]
+        public IActionResult RegisterNew([FromBody] ActivationAccount activationAccount)
         {
-            EmailSender emailSender = new EmailSender();
+            RegisterLoginService registerLoginService = new RegisterLoginService();
 
             if (activationAccount != null)
             {
-                emailSender.SendEmail(activationAccount.Email, "",$"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
+                var account = registerLoginService.CreateNewAdminUser(activationAccount);
+                _context.Add(account);
+                _context.SaveChanges();
                 return Ok();
             }
             else
             {
                 return NotFound();
+            }
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] string email, string oldPassword)
+        {
+            RegisterLoginService registerLoginService = new RegisterLoginService();
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                ActivationAccount account = _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
+                bool isMatch = registerLoginService.TokenMatch(oldPassword, account.password);
+
+                // TODO Message in front-end must be "Password and/or email is wrong try again"
+                // TODO lock if get wrong more than 3 times
+                if (!isMatch)
+                {
+                    return BadRequest();
+                }
+                // TODO Create new password page
+                else if (!account.IsActivated && isMatch)
+                {
+                    return Ok();
+                }
+                // TODO Authenticate the user
+                else if (account.IsActivated && isMatch)
+                {
+                    return Ok();
+                }
+                
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
             }
         }
     }

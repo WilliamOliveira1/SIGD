@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SIGD.Data;
+using SIGD.Helper;
+using SIGD.Interfaces;
+using SIGD.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +43,11 @@ namespace SIGD
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddScoped<IActivationAccountRepository, ActivationAccountRepository>();
+            services.AddSession(
+                x =>
+                { x.IdleTimeout = TimeSpan.FromMilliseconds(600000); })
+            .AddDistributedMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

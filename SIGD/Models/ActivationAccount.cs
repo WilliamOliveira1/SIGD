@@ -18,10 +18,7 @@ namespace SIGD.Models
     public class ActivationAccount
     {
         public Guid Id { get; set; }
-
-        [Required]
         public string UserName { get; set; }
-        [Required]
         public string Email { get; set; }
         public string password { get; set; }
         public DateTime passwordExpiration { get; set; }

@@ -14,7 +14,6 @@ function clientList(username, email) {
         $.post({
             url: apiPath,
             data: JSON.stringify(parameters),
-            dataType: 'json',
             contentType: 'application/json'
         })
             .done(function (response) {

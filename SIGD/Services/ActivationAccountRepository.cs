@@ -66,33 +66,7 @@ namespace SIGD.Services
         {
             return _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
         }
-
-
-        public bool IsEmailSaved(string email)
-        {
-            var data = _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
-            bool isInDB = false;
-            if(data != null)
-            {
-                isInDB = true;
-            }
-
-            return isInDB;
-        }
-
-        public bool IsUserNameSaved(string username)
-        {
-            var data = _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
-            bool isInDB = false;
-            if (data != null)
-            {
-                isInDB = true;
-            }
-
-            return isInDB;
-        }
-
-
+       
         /// <summary>
         /// Get ActivationAccount data that contains username
         /// </summary>
@@ -103,9 +77,50 @@ namespace SIGD.Services
             return _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
         }
 
-        public ActivationAccount GetModelById(Guid id)
+        /// <summary>
+        /// Get ActivationAccount data that contains id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private ActivationAccount GetModelById(Guid id)
         {
             return _context.ActivationAccount.Where(x => x.Id == id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Check if exist an ActivationAccount saved with email
+        /// </summary>
+        /// <param name="email">email saved</param>
+        /// <returns>true if exist in DB</returns>
+        /// <returns>false otherwise</returns>
+        private bool IsEmailSaved(string email)
+        {
+            var data = _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
+            bool isInDB = false;
+            if (data != null)
+            {
+                isInDB = true;
+            }
+
+            return isInDB;
+        }
+
+        /// <summary>
+        /// Check if exist an ActivationAccount saved with username
+        /// </summary>
+        /// <param name="username">username saved</param>
+        /// <returns>true if exist in DB</returns>
+        /// <returns>false otherwise</returns>
+        private bool IsUserNameSaved(string username)
+        {
+            var data = _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
+            bool isInDB = false;
+            if (data != null)
+            {
+                isInDB = true;
+            }
+
+            return isInDB;
         }
     }
 }

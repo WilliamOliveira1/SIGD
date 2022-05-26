@@ -1,12 +1,15 @@
-﻿using System;
+﻿using SIGD.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Security;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace SIGD.Helper
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         private const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
@@ -20,12 +23,13 @@ namespace SIGD.Helper
         /// Create a random token for first connection password
         /// </summary>
         /// <returns>random token</returns>
-        public string GetToken()
+        public SecureString GetToken()
         {
             string allChar = string.Join(upperChars, lowerChars, specialChars, numbers);
             Random random = new Random();
 
-            return new string(Enumerable.Repeat(allChar, 25).Select(token => token[random.Next(token.Length)]).ToArray());
+            return new NetworkCredential("", 
+                new string(Enumerable.Repeat(allChar, 25).Select(token => token[random.Next(token.Length)]).ToArray())).SecurePassword;
         }        
 
         /// <summary>
@@ -33,9 +37,9 @@ namespace SIGD.Helper
         /// </summary>
         /// <param name="password">password</param>
         /// <returns>The base64 token</returns>
-        public string Hash(string password)
+        public string Hash(SecureString password)
         {
-            return Hash(password, interactions);
+            return Hash(new NetworkCredential(string.Empty, password).Password, interactions);
         }
 
         /// <summary>
@@ -45,16 +49,16 @@ namespace SIGD.Helper
         /// <param name="hashedPassword">The hash.</param>
         /// <returns>True if is equal</returns>
         /// <returns>False otherwise</returns>
-        public bool Verify(string password, string hashedPassword)
+        public bool Verify(SecureString password, SecureString hashedPassword)
         {
             // Get hash bytes
-            byte[] hashBytes = Convert.FromBase64String(hashedPassword);
+            byte[] hashBytes = Convert.FromBase64String(new NetworkCredential(string.Empty, hashedPassword).Password);
             // Get salt
             byte[] salt = new byte[saltSize];
             Array.Copy(hashBytes, 0, salt, 0, saltSize);
 
             // Create hash with given salt
-            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, interactions);
+            var pbkdf2 = new Rfc2898DeriveBytes(new NetworkCredential(string.Empty, password).Password, salt, interactions);
             byte[] hash = pbkdf2.GetBytes(hashSize);
 
             // Get result

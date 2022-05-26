@@ -1,4 +1,5 @@
 ﻿using LiteDB;
+using SIGD.Interfaces;
 using SMTPConfig.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SIGD.Helper
 {
-    public class SIGDLiteDBHelper
+    public class SIGDLiteDBHelper : ISIGDLiteDBHelper
     {
         public static string liteDBpath = Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)), "SGID");
         public string liteDBFilepath = Path.Combine(liteDBpath, "SIGD.db");

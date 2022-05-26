@@ -47,7 +47,11 @@ namespace SIGD
             services.AddSession(
                 x =>
                 { x.IdleTimeout = TimeSpan.FromMilliseconds(600000); })
-            .AddDistributedMemoryCache();
+            .AddDistributedMemoryCache()
+            .AddSingleton<ISIGDLiteDBHelper, SIGDLiteDBHelper>()
+            .AddSingleton<ITokenService, TokenService>()
+            .AddSingleton<IRegisterLoginService, RegisterLoginService>()
+            .AddSingleton<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

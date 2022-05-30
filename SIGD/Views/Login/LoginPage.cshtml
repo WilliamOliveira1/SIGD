@@ -1,0 +1,73 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="container">
+    <main role="main" class="pb-3" id="loginForm">
+        <h1>Log in</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <section>
+                    <h4>Acessar</h4>
+                    <div class="form-group">
+                        <label>Usuário</label>
+                        <input class="form-control" type="text" placeholder="Digite o usuário" id="InputUsername" value="">
+                    </div>
+                    <h6>ou</h6>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input class="form-control" type="text" placeholder="Digite o email" id="InputEmail" value="">
+                        <div id="errorEmailMessage" class="mt-2">
+                            <span class="alert-danger">Não é um email valido.</span>
+                        </div>                        
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input class="form-control" type="password" placeholder="Digite a senha" data-val="true" id="InputPassword">
+                    </div>
+                    <div class="form-group">
+                        <button id="LoginSubmit" class="btn btn-primary">Acessar</button>
+                    </div>
+                    <div id="errorLoginMessage" class="mt-2 mb-2">
+                        <span class="alert-danger">Precisa preencher todos os campos.</span>
+                    </div>                    
+                    <div class="form-group">
+                        <p>
+                            <a id="forgotPassword" href="">Esqueceu a senha?</a>
+                        </p>
+                        <p>
+                            <a href="../Register/Register">Cadastre um novo usuário.</a>
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <div id="changePassword">
+        <div class="col-md-4">
+            <section>
+                <h4>Acessar</h4>
+                <div class="form-group">
+                    <label>Senha de primeiro acesso</label>
+                    <input class="form-control" type="password" placeholder="Digite a senha de primeiro acesso" id="InputFirstAccessPassword" value="">
+                </div>
+                <div class="form-group">
+                    <label>Nova senha</label>
+                    <input class="form-control" type="password" placeholder="Digite a nova senha" id="InputNewPassword">
+                </div>
+                <div class="form-group">
+                    <label>Confirme a nova senha</label>
+                    <input class="form-control" type="password" placeholder="Confirme a nova senha" id="InputCheckNewPassword">
+                    <span id="errorPasswordMessage" class="alert-danger mt-2">As novas senhas não são iguais</span>
+                </div>
+                <div class="form-group">
+                    <button id="ChangePasswordSubmit" class="btn btn-primary">Acessar</button>
+                </div>
+                <div id="errorChangeMessage" class="mt-2 mb-2">
+                    <span class="alert-danger">Precisa preencher todos os campos.</span>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

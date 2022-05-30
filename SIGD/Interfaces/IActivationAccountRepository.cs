@@ -13,9 +13,10 @@ namespace SIGD.Interfaces
         /// Save model data in data base
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="isFirstAccess"></param>
         /// <returns>true if data saved</returns>
         /// <returns>false otherwise</returns>
-        bool Save(ActivationAccount data);
+        bool Save(ActivationAccount data, bool isFirstAccess);
 
         /// <summary>
         /// Get ActivationAccount data that contains email

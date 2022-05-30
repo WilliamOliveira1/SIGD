@@ -26,12 +26,12 @@ namespace SIGD.Services
         /// <param name="data"></param>
         /// <returns>true if data saved</returns>
         /// <returns>false otherwise</returns>
-        public bool Save(ActivationAccount data)
+        public bool Save(ActivationAccount data,  bool isFirstAccess)
         {
             bool isEmailInDB = IsEmailSaved(data.Email);
             bool isUserNameInDB = IsUserNameSaved(data.UserName);
 
-            if(isEmailInDB || isUserNameInDB)
+            if((isEmailInDB || isUserNameInDB) && isFirstAccess)
             {
                 return false;
             }

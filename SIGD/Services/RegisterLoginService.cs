@@ -50,17 +50,22 @@ namespace SIGD.Services
         {
             try
             {
-                activationAccount.role = Role.administrator;
-                activationAccount.IsActivated = false;
-                activationAccount.password = new NetworkCredential(string.Empty, tokenService.Hash(newPassword)).Password;
-                activationAccount.passwordExpiration = DateTime.Now.AddMonths(3);
-                bool isSended = emailSender.SendEmailPasswordChanged(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
-                if (!isSended)
-                {
-                    return null;
-                }
+                activationAccount.IsActivated = true;
+                activationAccount.password = new NetworkCredential(string.Empty, tokenService.Hash(newPassword)).Password;                
 
                 return activationAccount;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
+        public bool ChangePasswordSendEmail(ActivationAccount activationAccount)
+        {
+            try
+            {
+                return emailSender.SendEmailPasswordChanged(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName} sua conta foi ativada. <br>se não  foi  você  entreem contato com o IT");
             }
             catch (Exception ex)
             {

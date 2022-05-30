@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using SIGD.Helper;
 using SIGD.Interfaces;
 using SIGD.Models;
 using SIGD.Services;
@@ -32,10 +34,10 @@ namespace SIGD.Controllers.API
                 var account = registerLoginService.CreateNewAdminUser(activationAccount);
                 if(account == null)
                 {
-                    return Forbid();
+                    return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_SENDING_EMAIL);
                 }
 
-                bool canSave = databaseService.Save(account);
+                bool canSave = databaseService.Save(account, true);
 
                 if(canSave)
                 {
@@ -53,69 +55,120 @@ namespace SIGD.Controllers.API
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] string email, string oldPassword)
-        {          
-            if (!string.IsNullOrEmpty(email))
+        public IActionResult Login([FromBody] JObject input)//string email, string oldPassword
+        {
+            string username = input?["username"]?.ToString();
+            string email = input?["email"]?.ToString();
+
+            if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(email))
             {
-                ActivationAccount account = databaseService.GetActivationAccountByEmail(email);
+                ActivationAccount account = new ActivationAccount();
+                
+                if (!string.IsNullOrEmpty(email))
+                {
+                    account = databaseService.GetActivationAccountByEmail(email);
+                }
+                else if(!string.IsNullOrEmpty(username))
+                {
+                    account = databaseService.GetActivationAccountByUserName(username);
+                }
+
                 if(account != null)
                 {
-                    bool isMatch = registerLoginService.TokenMatch(new NetworkCredential("", oldPassword).SecurePassword, 
-                        new NetworkCredential("", account.password).SecurePassword);
+                    SecureString oldPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
+                    bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.password).SecurePassword);
 
-                    // TODO Message in front-end must be "Password and/or email is wrong try again"
                     // TODO lock if get wrong more than 3 times
                     if (!isMatch)
                     {
-                        return BadRequest();
+                        return StatusCode((int)HttpStatusCode.BadRequest, SharedMessages.ERROR_PASSWORD_NOT_MATCH);
                     }
-                    // TODO Create new password page
                     else if (!account.IsActivated && isMatch)
                     {
-                        return Ok();
+                        return StatusCode((int)HttpStatusCode.OK, SharedMessages.CHANGE_FIRST_ACCESS_PASSWORD);
                     }
                     // TODO Authenticate the user
                     else if (account.IsActivated && isMatch)
                     {
-                        return Ok();
+                        return StatusCode((int)HttpStatusCode.OK);
                     }
 
-                    return Ok();
+                    return StatusCode((int)HttpStatusCode.OK);
                 }
                 else
                 {
-                    return NotFound();
+                    return StatusCode((int)HttpStatusCode.NotFound);
                 }
                 
             }
             else
             {
-                return BadRequest();
+                return StatusCode((int)HttpStatusCode.BadRequest);
             }
         }
 
 
         [HttpPost("changepassword")]
-        public IActionResult ChangePassword([FromBody] string email, SecureString newPassword, SecureString oldPassword)
+        public IActionResult ChangePassword([FromBody] JObject input)
         {
-            if (!string.IsNullOrEmpty(email))
+            bool canSave = false;
+
+            if (!string.IsNullOrEmpty(input?["email"]?.ToString()) || !string.IsNullOrEmpty(input?["oldpassword"]?.ToString()) 
+                || !string.IsNullOrEmpty(input?["password"]?.ToString()) || !string.IsNullOrEmpty(input?["username"]?.ToString()))
             {
-                ActivationAccount account = databaseService.GetActivationAccountByEmail(email);
+                ActivationAccount account = new ActivationAccount();
+                string username = input?["username"]?.ToString();
+                string email = input?["email"]?.ToString();
+                if (!string.IsNullOrEmpty(email))
+                {
+                    account = databaseService.GetActivationAccountByEmail(email);
+                }
+                else if (!string.IsNullOrEmpty(username))
+                {
+                    account = databaseService.GetActivationAccountByUserName(username);
+                }
+                
                 if (account != null)
                 {
-                    bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.password).SecurePassword);                    
-
-                    return Ok();
+                    SecureString oldPassword = new NetworkCredential("", input["oldpassword"]?.ToString()).SecurePassword;
+                    SecureString newPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
+                    bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.password).SecurePassword);
+                    if(isMatch)
+                    {
+                        account = registerLoginService.ChangePassword(account, newPassword);
+                        canSave = databaseService.Save(account, false);
+                    }
+                    else
+                    {
+                        return StatusCode((int)HttpStatusCode.BadRequest, SharedMessages.ERROR_FIRST_ACCESS_PASSWORD);
+                    }
+                    
+                    if(canSave)
+                    {
+                        bool isEmailSended = registerLoginService.ChangePasswordSendEmail(account);
+                        if(isEmailSended)
+                        {
+                            return StatusCode((int)HttpStatusCode.OK);
+                        }
+                        else
+                        {
+                            return StatusCode((int)HttpStatusCode.OK, SharedMessages.ERROR_SENDING_EMAIL_CHANGE_PASSWORD);
+                        }                        
+                    }
+                    else
+                    {
+                        return StatusCode((int)HttpStatusCode.InternalServerError, SharedMessages.ERROR_SAVING_DATA);
+                    }                    
                 }
                 else
                 {
-                    return NotFound();
+                    return StatusCode((int)HttpStatusCode.NotFound);
                 }
 
             }
             else
             {
-                return BadRequest();
+                return StatusCode((int)HttpStatusCode.BadRequest);
             }
         }
     }

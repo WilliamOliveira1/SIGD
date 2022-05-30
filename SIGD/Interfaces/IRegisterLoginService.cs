@@ -31,5 +31,11 @@ namespace SIGD.Interfaces
         /// <param name="dbPassword"></param>
         /// <returns></returns>
         bool TokenMatch(SecureString oldPassword, SecureString dbPassword);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="activationAccount"></param>
+        bool ChangePasswordSendEmail(ActivationAccount activationAccount);
     }
 }

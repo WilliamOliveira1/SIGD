@@ -43,6 +43,7 @@ namespace SIGD
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddMvc().AddNewtonsoftJson();
             services.AddScoped<IActivationAccountRepository, ActivationAccountRepository>();
             services.AddSession(
                 x =>

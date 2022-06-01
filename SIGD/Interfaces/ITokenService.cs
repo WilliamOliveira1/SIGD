@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SIGD.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
@@ -31,5 +32,23 @@ namespace SIGD.Interfaces
         /// <returns>True if is equal</returns>
         /// <returns>False otherwise</returns>
         bool Verify(SecureString password, SecureString hashedPassword);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="issuer"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        string BuildToken(string key, string issuer, ActivationAccount user);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="issuer"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        bool IsTokenValid(string key, string issuer, string token);
     }
 }

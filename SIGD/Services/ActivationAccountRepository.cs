@@ -77,6 +77,12 @@ namespace SIGD.Services
             return _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
         }
 
+        public ActivationAccount GetUser(ActivationAccount userModel)
+        {
+            return _context.ActivationAccount.Where(x => x.UserName.ToLower() == userModel.UserName.ToLower()
+                && x.Password == userModel.Password).FirstOrDefault();
+        }
+
         /// <summary>
         /// Get ActivationAccount data that contains id
         /// </summary>
@@ -122,5 +128,7 @@ namespace SIGD.Services
 
             return isInDB;
         }
+
+        
     }
 }

@@ -31,5 +31,12 @@ namespace SIGD.Interfaces
         /// <param name="username">username saved</param>
         /// <returns>ActivationAccount data</returns>
         ActivationAccount GetActivationAccountByUserName(string username);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userModel"></param>
+        /// <returns></returns>
+        ActivationAccount GetUser(ActivationAccount userModel);
     }
 }

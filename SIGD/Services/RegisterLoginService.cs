@@ -30,7 +30,7 @@ namespace SIGD.Services
                 activationAccount.role = Role.administrator;
                 activationAccount.IsActivated = false;
                 SecureString tokenFirstAccess = tokenService.GetToken();
-                activationAccount.password = tokenService.Hash(tokenFirstAccess);
+                activationAccount.Password = tokenService.Hash(tokenFirstAccess);
                 activationAccount.passwordExpiration = DateTime.Now.AddMonths(3);
                 bool isSended = emailSender.SendEmailFirstAccess(activationAccount.Email, tokenFirstAccess, $"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
                 if(!isSended)
@@ -51,7 +51,7 @@ namespace SIGD.Services
             try
             {
                 activationAccount.IsActivated = true;
-                activationAccount.password = new NetworkCredential(string.Empty, tokenService.Hash(newPassword)).Password;                
+                activationAccount.Password = new NetworkCredential(string.Empty, tokenService.Hash(newPassword)).Password;                
 
                 return activationAccount;
             }

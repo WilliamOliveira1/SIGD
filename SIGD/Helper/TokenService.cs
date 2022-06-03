@@ -84,7 +84,7 @@ namespace SIGD.Helper
             new Claim(ClaimTypes.Name, user.UserName),
             //new Claim(ClaimTypes.Role, user.role),
             new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
-        };
+            };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);

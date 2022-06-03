@@ -17,17 +17,44 @@ function login(username, email, password) {
             data: JSON.stringify(parameters),
             contentType: 'application/json'
         })
-            .done(function (response) {
+            .done(function (response) {                
                 if (response) {
                     $("#changePassword").attr("hidden", false);
                     $("#loginForm").attr("hidden", true);
                     setMessage(response);
+                }
+                else {
+                    $(location).attr('href', '../../Home/MainBoard');
                 }
                 //resolve(response);
                 //alertResponse(response);
             })
             .fail(function (response) {
                 //reject(response)
+                setErrorMessage(response.responseJSON);
+            })
+    })
+}
+
+function logout() {
+    let apiPath = BaseApiUrl() + "/api/register/logout";
+
+    return new Promise(function (resolve, reject) {
+        $.post({
+            url: apiPath,
+            contentType: 'application/json'
+        })
+            .done(function (response) {
+                if (response) {
+                    $("#changePassword").attr("hidden", false);
+                    $("#loginForm").attr("hidden", true);
+                    setMessage(response);
+                }
+                else {
+                    $(location).attr('href', '../../Home');
+                }
+            })
+            .fail(function (response) {
                 setErrorMessage(response.responseJSON);
             })
     })
@@ -55,11 +82,8 @@ function changePassword(oldPassword, password, email, username) {
                 else {
                     location.reload();
                 }
-                //resolve(response);
-                //alertResponse(response);
             })
             .fail(function (response) {
-                //reject(response)
                 setErrorMessage(response.responseJSON);
             })
     })
@@ -71,6 +95,10 @@ $('#LoginSubmit').click(function () {
     let password = document.getElementById('InputPassword').value == null ? "" : document.getElementById('InputPassword').value;
 
     login(username, email, password);
+});
+
+$('#logoutButton').click(function () {  
+    logout();
 });
 
 $('#ChangePasswordSubmit').click(function () {
@@ -150,7 +178,7 @@ function changePasswordForm() {
 function loginForm() {
     let username = document.getElementById('InputUsername').value == null ? "" : document.getElementById('InputUsername').value;
     let email = document.getElementById('InputEmail').value == null ? "" : document.getElementById('InputEmail').value;
-    let password = document.getElementById('InputPassword').value ? "" : document.getElementById('InputEmail').value;;
+    let password = document.getElementById('InputPassword').value == null ? "" : document.getElementById('InputPassword').value;;
     let isEmailType = isEmail(email);
 
     if (!username && !email && !password) {
@@ -158,7 +186,7 @@ function loginForm() {
         $("#LoginSubmit").prop("disabled", true);
     }
 
-    if (username.length > 0 || email.length > 0 || password.length > 0) {
+    if (username.length > 0 && email.length > 0 || password.length > 0) {
         $("#errorLoginMessage").attr("hidden", true);
     }
 
@@ -167,11 +195,17 @@ function loginForm() {
     }
     else if (isEmailType) {
         $("#errorEmailMessage").attr("hidden", true);
-        if (username || email && (password && password.length >= 8)) {
+        if (password && password.length >= 8) {
             $("#errorLoginMessage").attr("hidden", true);
             $("#LoginSubmit").prop("disabled", false);
         }
-    }    
+    }
+    else if (username) {
+        if (password && password.length >= 8) {
+            $("#errorLoginMessage").attr("hidden", true);
+            $("#LoginSubmit").prop("disabled", false);
+        }
+    }
 }
 
 function isEmail(email) {
@@ -180,6 +214,7 @@ function isEmail(email) {
 }
 
 $(document).ready(function () {
+    loginForm();
     $("#LoginSubmit").attr("disabled", true);
     $("#ChangePasswordSubmit").attr("disabled", true);
     $("#errorPasswordMessage").attr("hidden", true);

@@ -32,7 +32,7 @@ namespace SIGD.Services
                 SecureString tokenFirstAccess = tokenService.GetToken();
                 activationAccount.Password = tokenService.Hash(tokenFirstAccess);
                 activationAccount.passwordExpiration = DateTime.Now.AddMonths(3);
-                bool isSended = emailSender.SendEmailFirstAccess(activationAccount.Email, tokenFirstAccess, $"Bem vindo ao SIGD {activationAccount.UserName},Sua senha de primeiro acesso: ");
+                bool isSended = emailSender.SendEmailFirstAccess(activationAccount.Email, tokenFirstAccess, $"Bem vindo ao SIGD {activationAccount.UserName}, Sua senha de primeiro acesso: ");
                 if(!isSended)
                 {
                     return null;
@@ -65,7 +65,7 @@ namespace SIGD.Services
         {
             try
             {
-                return emailSender.SendEmailPasswordChanged(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName} sua conta foi ativada. <br>se não  foi  você  entreem contato com o IT");
+                return emailSender.SendEmailPasswordChanged(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName} sua conta foi ativada. <br>se não  foi  você  entre em contato com o setor IT");
             }
             catch (Exception ex)
             {

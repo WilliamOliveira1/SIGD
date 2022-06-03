@@ -43,8 +43,9 @@ namespace SIGD
                                 errorNumbersToAdd: null
                                 )));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders(); ;
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddMvc().AddNewtonsoftJson();

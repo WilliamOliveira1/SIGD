@@ -66,7 +66,17 @@ namespace SIGD.Services
         {
             return _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
         }
-       
+
+        public List<ActivationAccount> GetAllPrincipalsAccounts()
+        {
+            return _context.ActivationAccount.Where(x => x.role == Role.Principal).ToList();
+        }
+
+        public List<ActivationAccount> GetAllPrincipalsAccountsByAdmin(string adminManager)
+        {
+            return _context.ActivationAccount.Where(x => x.role == Role.Principal).Where(y => y.adminManager == adminManager).ToList();
+        }
+
         /// <summary>
         /// Get ActivationAccount data that contains username
         /// </summary>

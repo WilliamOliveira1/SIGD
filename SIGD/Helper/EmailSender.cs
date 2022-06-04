@@ -38,8 +38,6 @@ namespace SIGD.Helper
             MailAddress emailFrom = new MailAddress(emailAdressFrom, displayNameFrom);
             MailAddress emailTo = new MailAddress(emailAdressTo);
 
-            mailBody = "<h1>" + mailBody + " " + new NetworkCredential(string.Empty, tokenFirstAccess).Password + "</h1>";
-
             MailMessage mailMessage = new MailMessage()
             {
                 From = emailFrom,

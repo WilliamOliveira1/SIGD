@@ -2,6 +2,7 @@
 using SIGD.Interfaces;
 using SIGD.Models;
 using System;
+using System.IO;
 using System.Net;
 using System.Security;
 
@@ -23,16 +24,30 @@ namespace SIGD.Services
         /// </summary>
         /// <param name="activationAccount"></param>
         /// <returns></returns>
-        public ActivationAccount CreateNewAdminUser(ActivationAccount activationAccount)
-        {           
+        public ActivationAccount CreateNewUser(ActivationAccount activationAccount, Role accountType, string adminManager = null)
+        {
+            string emailHtml = string.Empty;
             try
             {
-                activationAccount.role = Role.administrator;
+                activationAccount.adminManager = adminManager;
+                activationAccount.role = accountType;
                 activationAccount.IsActivated = false;
                 SecureString tokenFirstAccess = tokenService.GetToken();
                 activationAccount.Password = tokenService.Hash(tokenFirstAccess);
                 activationAccount.passwordExpiration = DateTime.Now.AddMonths(3);
-                bool isSended = emailSender.SendEmailFirstAccess(activationAccount.Email, tokenFirstAccess, $"Bem vindo ao SIGD {activationAccount.UserName}, Sua senha de primeiro acesso: ");
+                if(string.IsNullOrEmpty(activationAccount.adminManager))
+                {
+                    emailHtml = File.ReadAllText(SharedPaths.FIRST_PASS_ACCESS_EMAIL_ADMIN);
+                    emailHtml = emailHtml.Replace("senhaprimeiroacesso", new NetworkCredential(string.Empty, tokenFirstAccess).Password).Replace("nomedeusuario ", activationAccount.UserName + " ");
+                }
+                else
+                {
+                    emailHtml = File.ReadAllText(SharedPaths.FIRST_PASS_ACCESS_EMAIL_PRINCIPAL);
+                    emailHtml = emailHtml.Replace("senhaprimeiroacesso", 
+                        new NetworkCredential(string.Empty, tokenFirstAccess).Password).Replace("nomedeusuario ", activationAccount.UserName)
+                        .Replace("nomedosupervisor", activationAccount.adminManager);
+                }                
+                bool isSended = emailSender.SendEmailFirstAccess(activationAccount.Email, tokenFirstAccess, emailHtml);
                 if(!isSended)
                 {
                     return null;
@@ -44,7 +59,7 @@ namespace SIGD.Services
             {
                 throw ex;
             }            
-        }
+        }        
 
         public ActivationAccount ChangePassword(ActivationAccount activationAccount, SecureString newPassword)
         {
@@ -65,7 +80,9 @@ namespace SIGD.Services
         {
             try
             {
-                return emailSender.SendEmailPasswordChanged(activationAccount.Email, $"Bem vindo ao SIGD {activationAccount.UserName} sua conta foi ativada. <br>se não  foi  você  entre em contato com o setor IT");
+                string emailHtml = File.ReadAllText(SharedPaths.ACCOUNT_ACTIVATED_EMAIL_TEMPLATE);
+                emailHtml = emailHtml.Replace("nomedeusuario ", activationAccount.UserName + " ");
+                return emailSender.SendEmailPasswordChanged(activationAccount.Email, emailHtml);
             }
             catch (Exception ex)
             {

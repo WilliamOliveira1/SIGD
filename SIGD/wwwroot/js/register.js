@@ -1,14 +1,9 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-function createNewUser(username, email) {
+﻿function createNewAdminUser(username, email) {
     let parameters = {
         'username': username,
         'email': email
     };
-    let apiPath = BaseApiUrl() + "/api/register/registernew";
+    let apiPath = BaseApiUrl() + "/api/register/registernewadmin";
 
     return new Promise(function (resolve, reject) {
         $.post({
@@ -27,11 +22,35 @@ function createNewUser(username, email) {
     })
 }
 
+function createNewUserPrincipal(username, email) {
+    let parameters = {
+        'username': username,
+        'email': email
+    };
+    let apiPath = BaseApiUrl() + "/api/register/registernewaprincipal";
+
+    return new Promise(function (resolve, reject) {
+        $.post({
+            url: apiPath,
+            data: JSON.stringify(parameters),
+            contentType: 'application/json'
+        })
+            .done(function (response) {
+                
+                window.location.replace(BaseApiUrl() + "/Login/LoginPage");
+            })
+            .fail(function (response) {
+                //reject(response)
+                setErrorMessage(response.responseJSON);
+            })
+    })
+}
+
 $('#RegisterSubmit').click(function () {
     let username = document.getElementById('InputUsernameRegister').value;
     let email = document.getElementById('InputEmailRegister').value;
 
-    createNewUser(username, email);
+    createNewAdminUser(username, email);
 });
 
 function BaseApiUrl() {
@@ -56,6 +75,13 @@ function setErrorMessage(message) {
 
 $("#InputUsernameRegister, #InputEmailRegister").on('input', function () {
     registerForm();
+});
+
+$('#registerSubmitSchool').click(function () {
+    let username = document.getElementById('InputUsernameRegisterSchool').value == null ? "" : document.getElementById('InputUsernameRegisterSchool').value;
+    let email = document.getElementById('InputEmailRegisterSchool').value == null ? "" : document.getElementById('InputEmailRegisterSchool').value;
+
+    createNewUserPrincipal(username, email);
 });
 
 function registerForm() {

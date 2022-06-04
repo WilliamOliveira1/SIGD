@@ -53,12 +53,13 @@ namespace SIGD.Controllers.API
             this._userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        [HttpPost("registernew")]
-        public IActionResult RegisterNew([FromBody] ActivationAccount activationAccount)
+        [AllowAnonymous]
+        [HttpPost("registernewadmin")]
+        public IActionResult RegisterNewAdmin([FromBody] ActivationAccount activationAccount)
         {
             if (activationAccount != null)
             {
-                var account = registerLoginService.CreateNewAdminUser(activationAccount);
+                var account = registerLoginService.CreateNewUser(activationAccount, Role.Administrator);
                 if(account == null)
                 {
                     return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_SENDING_EMAIL);
@@ -79,7 +80,7 @@ namespace SIGD.Controllers.API
             {
                 return NotFound();
             }
-        }               
+        }
 
         private ActivationAccount GetUser(ActivationAccount userModel)
         {
@@ -133,7 +134,7 @@ namespace SIGD.Controllers.API
                             generatedToken = tokenService.BuildToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);
                             if (generatedToken != null)
                             {                                                            
-                                await SetUser(account);
+                                await SetAdminUser(account);
                                 return StatusCode((int)HttpStatusCode.OK);
                             }
                             else
@@ -186,24 +187,7 @@ namespace SIGD.Controllers.API
             {
                 return StatusCode((int)HttpStatusCode.BadRequest);
             }
-        }
-
-        private async Task<string> SetUser(ActivationAccount account)
-        {
-            try
-            {
-                IdentityUser user = new IdentityUser { UserName = account.UserName, Email = account.Email };
-                HttpContext.Session.SetString("Token", generatedToken);
-                HttpContext.Session.Set(account.UserName, System.Text.Encoding.ASCII.GetBytes(account.role.ToString()));
-                Response.Cookies.Append("token", $"{generatedToken}", httpOnlyAndSecureFlag);                
-                await _signInManager.SignInAsync(user, isPersistent: false);                
-                return "";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }            
-        }
+        }        
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -273,6 +257,52 @@ namespace SIGD.Controllers.API
             else
             {
                 return StatusCode((int)HttpStatusCode.BadRequest);
+            }
+        }
+
+        [HttpPost("registernewaprincipal")]
+        public IActionResult RegisterNewPrincipal([FromBody] ActivationAccount activationAccount)
+        {
+            if (activationAccount != null)
+            {
+                string supervisorUsername = User.Identity.Name;
+                var account = registerLoginService.CreateNewUser(activationAccount, Role.Principal, supervisorUsername);
+                if (account == null)
+                {
+                    return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_SENDING_EMAIL);
+                }
+
+                bool canSave = databaseService.Save(account, true);
+
+                if (canSave)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        private async Task<string> SetAdminUser(ActivationAccount account)
+        {
+            try
+            {
+                IdentityUser user = new IdentityUser { UserName = account.UserName, Email = account.Email };
+                HttpContext.Session.SetString("Token", generatedToken);
+                HttpContext.Session.Set(account.UserName, System.Text.Encoding.ASCII.GetBytes(account.role.ToString()));
+                Response.Cookies.Append("token", $"{generatedToken}", httpOnlyAndSecureFlag);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
     }

@@ -14,7 +14,7 @@ namespace SIGD.Interfaces
         /// </summary>
         /// <param name="activationAccount"></param>
         /// <returns></returns>
-        ActivationAccount CreateNewAdminUser(ActivationAccount activationAccount);
+        ActivationAccount CreateNewUser(ActivationAccount activationAccount, Role accountType, string adminManager = null);
 
         /// <summary>
         /// 

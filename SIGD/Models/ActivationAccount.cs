@@ -8,8 +8,8 @@ namespace SIGD.Models
 {
     public enum Role
     {
-        administrator,
-        diretor
+        Administrator,
+        Principal
     }
 
     /// <summary>
@@ -24,5 +24,6 @@ namespace SIGD.Models
         public DateTime passwordExpiration { get; set; }
         public bool IsActivated { get; set; }
         public Role role { get; set; }
+        public string adminManager { get; set; }
     }
 }

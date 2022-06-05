@@ -28,14 +28,6 @@ namespace SIGD.Services
         /// <returns>false otherwise</returns>
         public bool Save(ActivationAccount data,  bool isFirstAccess)
         {
-            bool isEmailInDB = IsEmailSaved(data.Email);
-            bool isUserNameInDB = IsUserNameSaved(data.UserName);
-
-            if((isEmailInDB || isUserNameInDB) && isFirstAccess)
-            {
-                return false;
-            }
-
             try
             {
                 var modelData = GetModelById(data.Id);
@@ -67,16 +59,6 @@ namespace SIGD.Services
             return _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
         }
 
-        public List<ActivationAccount> GetAllPrincipalsAccounts()
-        {
-            return _context.ActivationAccount.Where(x => x.role == Role.Principal).ToList();
-        }
-
-        public List<ActivationAccount> GetAllPrincipalsAccountsByAdmin(string adminManager)
-        {
-            return _context.ActivationAccount.Where(x => x.role == Role.Principal).Where(y => y.adminManager == adminManager).ToList();
-        }
-
         /// <summary>
         /// Get ActivationAccount data that contains username
         /// </summary>
@@ -85,13 +67,7 @@ namespace SIGD.Services
         public ActivationAccount GetActivationAccountByUserName(string username)
         {
             return _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
-        }
-
-        public ActivationAccount GetUser(ActivationAccount userModel)
-        {
-            return _context.ActivationAccount.Where(x => x.UserName.ToLower() == userModel.UserName.ToLower()
-                && x.Password == userModel.Password).FirstOrDefault();
-        }
+        }        
 
         /// <summary>
         /// Get ActivationAccount data that contains id
@@ -103,42 +79,20 @@ namespace SIGD.Services
             return _context.ActivationAccount.Where(x => x.Id == id).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Check if exist an ActivationAccount saved with email
-        /// </summary>
-        /// <param name="email">email saved</param>
-        /// <returns>true if exist in DB</returns>
-        /// <returns>false otherwise</returns>
-        private bool IsEmailSaved(string email)
+        public ActivationAccount GetUser(ActivationAccount userModel)
         {
-            var data = _context.ActivationAccount.Where(x => x.Email == email).FirstOrDefault();
-            bool isInDB = false;
-            if (data != null)
-            {
-                isInDB = true;
-            }
-
-            return isInDB;
+            return _context.ActivationAccount.Where(x => x.UserName.ToLower() == userModel.UserName.ToLower()
+                && x.Password == userModel.Password).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Check if exist an ActivationAccount saved with username
-        /// </summary>
-        /// <param name="username">username saved</param>
-        /// <returns>true if exist in DB</returns>
-        /// <returns>false otherwise</returns>
-        private bool IsUserNameSaved(string username)
+        public List<ActivationAccount> GetAllPrincipalsAccounts()
         {
-            var data = _context.ActivationAccount.Where(x => x.UserName == username).FirstOrDefault();
-            bool isInDB = false;
-            if (data != null)
-            {
-                isInDB = true;
-            }
-
-            return isInDB;
+            return _context.ActivationAccount.Where(x => x.role == Role.Principal).ToList();
         }
 
-        
+        public List<ActivationAccount> GetAllPrincipalsAccountsByAdmin(string adminManager)
+        {
+            return _context.ActivationAccount.Where(x => x.role == Role.Principal).Where(y => y.adminManager == adminManager).ToList();
+        }
     }
 }

@@ -37,5 +37,50 @@ namespace SIGD.Interfaces
         /// </summary>
         /// <param name="activationAccount"></param>
         bool ChangePasswordSendEmail(ActivationAccount activationAccount);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="activationAccount"></param>
+        /// <param name="isFirstAccess"></param>
+        /// <returns></returns>
+        bool SaveAccount(ActivationAccount activationAccount, bool isFirstAccess);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userModel"></param>
+        /// <returns></returns>
+        ActivationAccount GetUser(ActivationAccount userModel);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        ActivationAccount GetUserByUsername(string username);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        ActivationAccount GetUserByEmail(string email);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="adminManag"></param>
+        /// <returns></returns>
+        List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Key"></param>
+        /// <param name="issuer"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        string GetJWTToken(string Key, string issuer, ActivationAccount account);
     }
 }

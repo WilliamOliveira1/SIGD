@@ -2,6 +2,7 @@
 using SIGD.Interfaces;
 using SIGD.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security;
@@ -12,11 +13,13 @@ namespace SIGD.Services
     {
         private IEmailSender emailSender;
         private ITokenService tokenService;
+        private IActivationAccountRepository databaseService;
 
-        public RegisterLoginService(IEmailSender emailSender, ITokenService tokenService)
+        public RegisterLoginService(IEmailSender emailSender, ITokenService tokenService, IActivationAccountRepository databaseService)
         {
             this.emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
             this.tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            this.databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         }
 
         /// <summary>
@@ -59,7 +62,14 @@ namespace SIGD.Services
             {
                 throw ex;
             }            
-        }        
+        }
+
+        public bool SaveAccount(ActivationAccount activationAccount, bool isFirstAccess)
+        {
+            return databaseService.Save(activationAccount, isFirstAccess);
+        }
+
+
 
         public ActivationAccount ChangePassword(ActivationAccount activationAccount, SecureString newPassword)
         {
@@ -99,6 +109,65 @@ namespace SIGD.Services
         public bool TokenMatch(SecureString oldPassword, SecureString dbPassword)
         {
             return tokenService.Verify(oldPassword, dbPassword);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public ActivationAccount GetUserByUsername(string username)
+        {
+            return databaseService.GetActivationAccountByUserName(username);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public ActivationAccount GetUserByEmail(string email)
+        {
+            return databaseService.GetActivationAccountByEmail(email);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="adminManag"></param>
+        /// <returns></returns>
+        public List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag)
+        {
+            try
+            {
+                return databaseService.GetAllPrincipalsAccountsByAdmin(adminManag);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Key"></param>
+        /// <param name="issuer"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public string GetJWTToken(string Key, string issuer, ActivationAccount account)
+        {
+            return tokenService.BuildToken(Key, issuer.ToString(), account);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userModel"></param>
+        /// <returns></returns>
+        public ActivationAccount GetUser(ActivationAccount account)
+        {
+            return databaseService.GetUser(account);
         }
     }
 }

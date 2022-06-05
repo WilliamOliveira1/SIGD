@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SIGD.Models
@@ -20,6 +21,7 @@ namespace SIGD.Models
         public Guid Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
+        [JsonIgnore]
         public string Password { get; set; }
         public DateTime passwordExpiration { get; set; }
         public bool IsActivated { get; set; }

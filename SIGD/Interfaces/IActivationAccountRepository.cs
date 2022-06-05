@@ -38,5 +38,18 @@ namespace SIGD.Interfaces
         /// <param name="userModel"></param>
         /// <returns></returns>
         ActivationAccount GetUser(ActivationAccount userModel);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        List<ActivationAccount> GetAllPrincipalsAccounts();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="adminManager"></param>
+        /// <returns></returns>
+        List<ActivationAccount> GetAllPrincipalsAccountsByAdmin(string adminManager);        
     }
 }

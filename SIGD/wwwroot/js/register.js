@@ -36,8 +36,7 @@ function createNewUserPrincipal(username, email) {
             contentType: 'application/json'
         })
             .done(function (response) {
-                
-                window.location.replace(BaseApiUrl() + "/Login/LoginPage");
+                location.reload();
             })
             .fail(function (response) {
                 //reject(response)

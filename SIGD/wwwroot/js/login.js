@@ -214,7 +214,6 @@ function isEmail(email) {
 }
 
 $(document).ready(function () {
-    loginForm();
     $("#LoginSubmit").attr("disabled", true);
     $("#ChangePasswordSubmit").attr("disabled", true);
     $("#errorPasswordMessage").attr("hidden", true);

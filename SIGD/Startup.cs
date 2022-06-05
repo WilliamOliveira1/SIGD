@@ -50,13 +50,14 @@ namespace SIGD
             services.AddRazorPages();
             services.AddMvc().AddNewtonsoftJson();
             services.AddScoped<IActivationAccountRepository, ActivationAccountRepository>();
+            services.AddScoped<IRegisterLoginService, RegisterLoginService>();
+            services.AddScoped<IUsersManagedService, UsersManagedService>();
             services.AddSession(
                 x =>
                 { x.IdleTimeout = TimeSpan.FromMilliseconds(600000); })
             .AddDistributedMemoryCache()
             .AddSingleton<ISIGDLiteDBHelper, SIGDLiteDBHelper>()
             .AddSingleton<ITokenService, TokenService>()
-            .AddSingleton<IRegisterLoginService, RegisterLoginService>()
             .AddSingleton<IEmailSender, EmailSender>();
 
             services.AddTransient<ITokenService, TokenService>();

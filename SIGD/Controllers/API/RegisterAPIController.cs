@@ -10,11 +10,9 @@ using Newtonsoft.Json.Linq;
 using SIGD.Helper;
 using SIGD.Interfaces;
 using SIGD.Models;
-using SIGD.Services;
 using System;
 using System.Net;
 using System.Security;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace SIGD.Controllers.API
@@ -23,9 +21,7 @@ namespace SIGD.Controllers.API
     [Produces("application/json")]
     [ApiController]
     public class RegisterAPIController : Controller
-    {
-        private IActivationAccountRepository databaseService;
-        private ITokenService tokenService;
+    {        
         private IRegisterLoginService registerLoginService;
         private readonly IConfiguration _config;
         private string generatedToken = null;
@@ -36,16 +32,12 @@ namespace SIGD.Controllers.API
         private const int MAX_ATTEMPT = 3;
 
         public RegisterAPIController(
-            IActivationAccountRepository databaseService, 
-            ITokenService tokenService, 
             IRegisterLoginService registerLoginService,
             IConfiguration _config,
             IMemoryCache lockAccount,
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager)
-        {
-            this.databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
-            this.tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+        {                        
             this.registerLoginService = registerLoginService ?? throw new ArgumentNullException(nameof(registerLoginService));
             this._config = _config ?? throw new ArgumentNullException(nameof(_config));
             this.lockAccount = lockAccount ?? throw new ArgumentNullException(nameof(lockAccount));
@@ -57,40 +49,56 @@ namespace SIGD.Controllers.API
         [HttpPost("registernewadmin")]
         public IActionResult RegisterNewAdmin([FromBody] ActivationAccount activationAccount)
         {
+            ActivationAccount account = new ActivationAccount();
+
+            if(string.IsNullOrEmpty(activationAccount.Email) || string.IsNullOrEmpty(activationAccount.UserName))
+            {
+                return StatusCode((int)HttpStatusCode.BadRequest);
+            }
+
             if (activationAccount != null)
             {
-                var account = registerLoginService.CreateNewUser(activationAccount, Role.Administrator);
+                ActivationAccount accountByEmail = registerLoginService.GetUserByEmail(activationAccount.Email);
+                ActivationAccount accountByUser = registerLoginService.GetUserByUsername(activationAccount.UserName);
+
+                if (accountByEmail != null || accountByUser != null)
+                {
+                    if (accountByEmail?.Email == activationAccount.Email)
+                    {
+                        return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_EMAIL_TAKEN);
+                    }
+                    else if (accountByUser?.UserName == activationAccount.UserName)
+                    {
+                        return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_USERNAME_TAKEN);
+                    }                    
+                }
+
+                account = registerLoginService.CreateNewUser(activationAccount, Role.Administrator);
                 if(account == null)
                 {
                     return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_SENDING_EMAIL);
                 }
 
-                bool canSave = databaseService.Save(account, true);
+                bool canSave = registerLoginService.SaveAccount(account, true);
 
                 if(canSave)
                 {
-                    return Ok();
+                    return StatusCode((int)HttpStatusCode.OK);
                 }
                 else
                 {
-                    return Forbid();
+                    return StatusCode((int)HttpStatusCode.Forbidden);
                 }
             }
             else
             {
-                return NotFound();
+                return StatusCode((int)HttpStatusCode.NotFound);
             }
-        }
-
-        private ActivationAccount GetUser(ActivationAccount userModel)
-        {
-            // Write your code here to authenticate the user     
-            return databaseService.GetUser(userModel);
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] JObject input)//string email, string oldPassword
+        public async Task<IActionResult> Login([FromBody] JObject input)
         {
             string username = input?["username"]?.ToString();
             string email = input?["email"]?.ToString();
@@ -99,17 +107,17 @@ namespace SIGD.Controllers.API
             if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(email))
             {
                 ActivationAccount account = new ActivationAccount();
-                
+
                 if (!string.IsNullOrEmpty(email))
                 {
-                    account = databaseService.GetActivationAccountByEmail(email);
+                    account = registerLoginService.GetUserByEmail(email);
                 }
-                else if(!string.IsNullOrEmpty(username))
+                else if (!string.IsNullOrEmpty(username))
                 {
-                    account = databaseService.GetActivationAccountByUserName(username);
+                    account = registerLoginService.GetUserByUsername(username);
                 }
 
-                if(account != null)
+                if (account != null)
                 {
                     // time that will stay locked thee account
                     var lockAccountTime = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
@@ -119,7 +127,7 @@ namespace SIGD.Controllers.API
 
                     if(lockAccount.TryGetValue(account.UserName, out userLoginAttempt))
                     {
-                        if (userLoginAttempt == MAX_ATTEMPT)
+                        if (userLoginAttempt == MAX_ATTEMPT || userLoginAttempt >= MAX_ATTEMPT)
                         {
                             return StatusCode((int)HttpStatusCode.BadRequest);
                         }
@@ -128,10 +136,10 @@ namespace SIGD.Controllers.API
                     // TODO lock if get wrong more than 3 times
                     if (account.IsActivated && isMatch)
                     {
-                        var validUser = GetUser(account);
+                        var validUser = registerLoginService.GetUser(account);
                         if (validUser != null)
                         {
-                            generatedToken = tokenService.BuildToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);
+                            generatedToken = registerLoginService.GetJWTToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);
                             if (generatedToken != null)
                             {                                                            
                                 await SetAdminUser(account);
@@ -139,7 +147,7 @@ namespace SIGD.Controllers.API
                             }
                             else
                             {
-                                return StatusCode((int)HttpStatusCode.NotFound);
+                                return StatusCode((int)HttpStatusCode.InternalServerError);
                             }
                         }
                         else
@@ -201,30 +209,36 @@ namespace SIGD.Controllers.API
         {
             bool canSave = false;
 
-            if (!string.IsNullOrEmpty(input?["email"]?.ToString()) || !string.IsNullOrEmpty(input?["oldpassword"]?.ToString()) 
+            if (string.IsNullOrEmpty(input?["email"]?.ToString()) || string.IsNullOrEmpty(input?["oldpassword"]?.ToString())
+                || string.IsNullOrEmpty(input?["password"]?.ToString()) || string.IsNullOrEmpty(input?["username"]?.ToString()))
+            {
+                return StatusCode((int)HttpStatusCode.BadRequest);
+            }
+
+            if (!string.IsNullOrEmpty(input?["email"]?.ToString()) || !string.IsNullOrEmpty(input?["oldpassword"]?.ToString())
                 || !string.IsNullOrEmpty(input?["password"]?.ToString()) || !string.IsNullOrEmpty(input?["username"]?.ToString()))
             {
                 ActivationAccount account = new ActivationAccount();
                 string username = input?["username"]?.ToString();
                 string email = input?["email"]?.ToString();
+                SecureString oldPassword = new NetworkCredential("", input["oldpassword"]?.ToString()).SecurePassword;
+                SecureString newPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
                 if (!string.IsNullOrEmpty(email))
                 {
-                    account = databaseService.GetActivationAccountByEmail(email);
+                    account = registerLoginService.GetUserByEmail(email);
                 }
                 else if (!string.IsNullOrEmpty(username))
                 {
-                    account = databaseService.GetActivationAccountByUserName(username);
+                    account = registerLoginService.GetUserByUsername(username);
                 }
                 
                 if (account != null)
-                {
-                    SecureString oldPassword = new NetworkCredential("", input["oldpassword"]?.ToString()).SecurePassword;
-                    SecureString newPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
+                {                    
                     bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.Password).SecurePassword);
                     if(isMatch)
                     {
                         account = registerLoginService.ChangePassword(account, newPassword);
-                        canSave = databaseService.Save(account, false);
+                        canSave = registerLoginService.SaveAccount(account, false);
                     }
                     else
                     {
@@ -265,6 +279,21 @@ namespace SIGD.Controllers.API
         {
             if (activationAccount != null)
             {
+                ActivationAccount accountByEmail = registerLoginService.GetUserByEmail(activationAccount.Email);
+                ActivationAccount accountByUser = registerLoginService.GetUserByUsername(activationAccount.UserName);
+
+                if (accountByEmail != null || accountByUser != null)
+                {
+                    if (accountByEmail?.Email == activationAccount.Email)
+                    {
+                        return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_EMAIL_TAKEN);
+                    }
+                    else if (accountByUser?.UserName == activationAccount.UserName)
+                    {
+                        return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_USERNAME_TAKEN);
+                    }
+                }
+
                 string supervisorUsername = User.Identity.Name;
                 var account = registerLoginService.CreateNewUser(activationAccount, Role.Principal, supervisorUsername);
                 if (account == null)
@@ -272,11 +301,9 @@ namespace SIGD.Controllers.API
                     return StatusCode((int)HttpStatusCode.Forbidden, SharedMessages.ERROR_SENDING_EMAIL);
                 }
 
-                bool canSave = databaseService.Save(account, true);
-
-                if (canSave)
+                if (registerLoginService.SaveAccount(account, true))
                 {
-                    return Ok();
+                    return StatusCode((int)HttpStatusCode.OK);
                 }
                 else
                 {
@@ -288,6 +315,7 @@ namespace SIGD.Controllers.API
                 return NotFound();
             }
         }
+
 
         private async Task<string> SetAdminUser(ActivationAccount account)
         {

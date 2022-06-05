@@ -10,6 +10,8 @@
     <title>@ViewData["Title"] - SIGD</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/datatables.css" />
+    <link rel="stylesheet" href="~/css/dataTables.bootstrap.css" />
 </head>
 <body id="mainBody">
     <header>
@@ -32,7 +34,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="MainBoard">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="CreateUser">Criar usuário</a>
+                                <a class="nav-link text-dark" id="createUserTab" asp-area="" asp-controller="Home" asp-action="CreateUser">Criar usuário</a>
                             </li>
                         }
                     </ul>
@@ -40,7 +42,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div id="containerDiv" class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -57,6 +59,11 @@
     <script id="registerScript" src="~/js/register.js" asp-append-version="true" hidden></script>
     <script id="loginScript" src="~/js/login.js" asp-append-version="true"></script>
     <script src="~/js/swal.js" asp-append-version="true"></script>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <script id="usersManagedScript" src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
+        <script id="usersManagedScript" src="~/js/datatables.js" asp-append-version="true"></script>
+    }
     @RenderSection("Scripts", required: false)
 </body>
 </html>

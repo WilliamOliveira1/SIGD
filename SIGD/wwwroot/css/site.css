@@ -69,3 +69,49 @@ body {
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
 }
+
+#usersManagedTable {
+    width: 1100px !important;
+}
+
+.margin-left-table {
+    margin-left: 10px;
+}
+
+@media only screen and (max-width: 1220px) and (min-width: 991px) {
+    #usersManagedTable {
+        width: 950px !important;
+    }
+}
+
+@media only screen and (max-width: 990px) and (min-width: 817px) {
+    #usersManagedTable {
+        width: 750px !important;
+    }
+}
+
+@media only screen and (max-width: 816px) and (min-width: 680px) {
+    #usersManagedTable {
+        width: 600px !important;
+    }
+}
+
+@media only screen and (max-width: 700px) and (min-width: 581px) {
+    #usersManagedTable {
+        width: 500px !important;
+    }
+}
+
+@media only screen and (max-width: 580px) and (min-width: 551px) {
+    #usersManagedTable {
+        width: 500px !important;
+        margin-left: 20px;
+    }
+}
+
+@media only screen and (max-width: 550px) and (min-width: 300px) {
+    #usersManagedTable {
+        width: 400px !important;
+        margin-left: 10px;
+    }
+}

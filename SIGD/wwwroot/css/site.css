@@ -115,3 +115,11 @@ body {
         margin-left: 10px;
     }
 }
+
+input[type=file]::-webkit-file-upload-button {
+    visibility: hidden;
+    width: 450px;
+    height: 200px;
+    text-align: center;
+    margin: auto;
+}

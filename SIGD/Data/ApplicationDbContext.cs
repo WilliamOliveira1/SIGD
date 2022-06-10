@@ -18,5 +18,6 @@ namespace SIGD.Data
         /// Each of models must be set here to have sql context
         /// </summary>
         public DbSet<ActivationAccount> ActivationAccount { get; set; }
+        public DbSet<FileModel> FilesContext { get; set; }
     }
 }

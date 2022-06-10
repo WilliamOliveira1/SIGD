@@ -11,8 +11,12 @@ using SIGD.Helper;
 using SIGD.Interfaces;
 using SIGD.Models;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SIGD.Controllers.API
@@ -96,6 +100,11 @@ namespace SIGD.Controllers.API
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] JObject input)
@@ -103,107 +112,130 @@ namespace SIGD.Controllers.API
             string username = input?["username"]?.ToString();
             string email = input?["email"]?.ToString();
             int userLoginAttempt = 0;            
-
-            if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(email))
+            try
             {
-                ActivationAccount account = new ActivationAccount();
-
-                if (!string.IsNullOrEmpty(email))
+                if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(email))
                 {
-                    account = registerLoginService.GetUserByEmail(email);
-                }
-                else if (!string.IsNullOrEmpty(username))
-                {
-                    account = registerLoginService.GetUserByUsername(username);
-                }
+                    ActivationAccount account = new ActivationAccount();
 
-                if (account != null)
-                {
-                    // time that will stay locked thee account
-                    var lockAccountTime = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
-
-                    SecureString oldPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
-                    bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.Password).SecurePassword);
-
-                    if(lockAccount.TryGetValue(account.UserName, out userLoginAttempt))
+                    if (!string.IsNullOrEmpty(email))
                     {
-                        if (userLoginAttempt == MAX_ATTEMPT || userLoginAttempt >= MAX_ATTEMPT)
-                        {
-                            return StatusCode((int)HttpStatusCode.BadRequest);
-                        }
+                        account = registerLoginService.GetUserByEmail(email);
+                    }
+                    else if (!string.IsNullOrEmpty(username))
+                    {
+                        account = registerLoginService.GetUserByUsername(username);
                     }
 
-                    // TODO lock if get wrong more than 3 times
-                    if (account.IsActivated && isMatch)
+                    if (account != null)
                     {
-                        var validUser = registerLoginService.GetUser(account);
-                        if (validUser != null)
+                        // time that will stay locked thee account
+                        var lockAccountTime = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
+
+                        SecureString oldPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
+                        bool isMatch = registerLoginService.TokenMatch(oldPassword, new NetworkCredential("", account.Password).SecurePassword);
+
+                        if (lockAccount.TryGetValue(account.UserName, out userLoginAttempt))
                         {
-                            generatedToken = registerLoginService.GetJWTToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);
-                            if (generatedToken != null)
-                            {                                                            
-                                await SetAdminUser(account);
-                                return StatusCode((int)HttpStatusCode.OK);
+                            if (userLoginAttempt == MAX_ATTEMPT || userLoginAttempt >= MAX_ATTEMPT)
+                            {
+                                return StatusCode((int)HttpStatusCode.BadRequest);
+                            }
+                        }
+
+                        // TODO lock if get wrong more than 3 times
+                        if (account.IsActivated && isMatch)
+                        {
+                            var validUser = registerLoginService.GetUser(account);
+                            if (validUser != null)
+                            {
+                                generatedToken = registerLoginService.GetJWTToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);
+                                if (generatedToken != null)
+                                {
+                                    await SetAdminUser(account);
+                                    return StatusCode((int)HttpStatusCode.OK);
+                                }
+                                else
+                                {
+                                    return StatusCode((int)HttpStatusCode.InternalServerError);
+                                }
                             }
                             else
                             {
-                                return StatusCode((int)HttpStatusCode.InternalServerError);
+                                return StatusCode((int)HttpStatusCode.NotFound);
                             }
+                        }
+                        else if (!account.IsActivated && isMatch)
+                        {
+                            if (userLoginAttempt == MAX_ATTEMPT)
+                            {
+                                return StatusCode((int)HttpStatusCode.BadRequest);
+                            }
+                            return StatusCode((int)HttpStatusCode.OK, SharedMessages.CHANGE_FIRST_ACCESS_PASSWORD);
+                        }
+                        else if (!isMatch)
+                        {
+                            userLoginAttempt++;
+                            lockAccount.Set(account.UserName, userLoginAttempt, lockAccountTime);
+                            if (userLoginAttempt == MAX_ATTEMPT)
+                            {
+                                return StatusCode((int)HttpStatusCode.BadRequest);
+                            }
+                            return StatusCode((int)HttpStatusCode.BadRequest, SharedMessages.ERROR_PASSWORD_NOT_MATCH);
                         }
                         else
                         {
-                            return StatusCode((int)HttpStatusCode.NotFound);
+                            lockAccount.TryGetValue(account.UserName, out userLoginAttempt);
+                            userLoginAttempt++;
+                            lockAccount.Set(account.UserName, userLoginAttempt, lockAccountTime);
+                            if (userLoginAttempt == MAX_ATTEMPT)
+                            {
+                                return StatusCode((int)HttpStatusCode.BadRequest);
+                            }
+                            return BadRequest();
                         }
                     }
-                    else if (!account.IsActivated && isMatch)
-                    {
-                        if (userLoginAttempt == MAX_ATTEMPT)
-                        {
-                            return StatusCode((int)HttpStatusCode.BadRequest);
-                        }
-                        return StatusCode((int)HttpStatusCode.OK, SharedMessages.CHANGE_FIRST_ACCESS_PASSWORD);
-                    }
-                    else if (!isMatch)
-                    {                        
-                        userLoginAttempt++;
-                        lockAccount.Set(account.UserName, userLoginAttempt, lockAccountTime);
-                        if (userLoginAttempt == MAX_ATTEMPT)
-                        {
-                            return StatusCode((int)HttpStatusCode.BadRequest);
-                        }
-                        return StatusCode((int)HttpStatusCode.BadRequest, SharedMessages.ERROR_PASSWORD_NOT_MATCH);
-                    }                    
                     else
                     {
-                        lockAccount.TryGetValue(account.UserName, out userLoginAttempt);
-                        userLoginAttempt++;
-                        lockAccount.Set(account.UserName, userLoginAttempt, lockAccountTime);
-                        if (userLoginAttempt == MAX_ATTEMPT)
-                        {
-                            return StatusCode((int)HttpStatusCode.BadRequest);
-                        }
-                        return BadRequest();
-                    }                    
+                        return StatusCode((int)HttpStatusCode.NotFound);
+                    }
+
                 }
                 else
-                {                    
-                    return StatusCode((int)HttpStatusCode.NotFound);
+                {
+                    return StatusCode((int)HttpStatusCode.BadRequest);
                 }
-                
             }
-            else
+            catch (Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.BadRequest);
-            }
-        }        
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }            
+        }
 
+        /// <summary>
+        /// Lougout the account
+        /// </summary>
+        /// <returns>OK when successful</returns>
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            return Ok();
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return StatusCode((int)HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+                return StatusCode((int)HttpStatusCode.InternalServerError);
+            }            
         }
 
+        /// <summary>
+        /// Change first access password
+        /// </summary>
+        /// <param name="input">Object with data to change password</param>
+        /// <returns>OK when successful</returns>
         [HttpPost("changepassword")]
         public IActionResult ChangePassword([FromBody] JObject input)
         {
@@ -223,6 +255,7 @@ namespace SIGD.Controllers.API
                 string email = input?["email"]?.ToString();
                 SecureString oldPassword = new NetworkCredential("", input["oldpassword"]?.ToString()).SecurePassword;
                 SecureString newPassword = new NetworkCredential("", input["password"]?.ToString()).SecurePassword;
+
                 if (!string.IsNullOrEmpty(email))
                 {
                     account = registerLoginService.GetUserByEmail(email);
@@ -274,6 +307,11 @@ namespace SIGD.Controllers.API
             }
         }
 
+        /// <summary>
+        /// Create a principal user
+        /// </summary>
+        /// <param name="activationAccount">Account data</param>
+        /// <returns>OK when successful</returns>
         [HttpPost("registernewaprincipal")]
         public IActionResult RegisterNewPrincipal([FromBody] ActivationAccount activationAccount)
         {
@@ -316,8 +354,11 @@ namespace SIGD.Controllers.API
             }
         }
 
-
-        private async Task<string> SetAdminUser(ActivationAccount account)
+        /// <summary>
+        /// Set authentication
+        /// </summary>
+        /// <param name="account">Account data</param>
+        private async Task SetAdminUser(ActivationAccount account)
         {
             try
             {
@@ -326,12 +367,11 @@ namespace SIGD.Controllers.API
                 HttpContext.Session.Set(account.UserName, System.Text.Encoding.ASCII.GetBytes(account.role.ToString()));
                 Response.Cookies.Append("token", $"{generatedToken}", httpOnlyAndSecureFlag);
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return "";
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                string message = ex.Message;
             }
-        }
+        }        
     }
 }

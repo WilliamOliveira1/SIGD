@@ -52,6 +52,8 @@ namespace SIGD
             services.AddScoped<IActivationAccountRepository, ActivationAccountRepository>();
             services.AddScoped<IRegisterLoginService, RegisterLoginService>();
             services.AddScoped<IUsersManagedService, UsersManagedService>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IFilesRepository, FilesRepository>();
             services.AddSession(
                 x =>
                 { x.IdleTimeout = TimeSpan.FromMilliseconds(600000); })

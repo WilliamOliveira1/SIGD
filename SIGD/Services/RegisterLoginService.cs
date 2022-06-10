@@ -69,8 +69,6 @@ namespace SIGD.Services
             return databaseService.Save(activationAccount, isFirstAccess);
         }
 
-
-
         public ActivationAccount ChangePassword(ActivationAccount activationAccount, SecureString newPassword)
         {
             try

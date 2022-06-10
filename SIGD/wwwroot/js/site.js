@@ -1,4 +1,33 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿$(document).ready(function () {
+    let apiPath = BaseApiUrl() + "/api/filemanager/savefiles";
 
-// Write your JavaScript code.
+    function BaseApiUrl() {
+        return window.location.origin;
+    }
+    
+    $('#fileSubmit').click((e) => {
+        let myFile = $('#fileTest').prop('files');
+        const fd = new FormData();
+        
+        // add all selected files
+        for (var i = 0; i < myFile.length; i++) {
+            fd.append("test", myFile[i], myFile[i].name);
+            console.log(myFile[i].name);
+        }
+        console.log(fd.getAll('test'));
+
+        fetch(apiPath, { method: "POST", body: fd }).then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Something went wrong');
+        })
+            .then((responseJson) => {
+                // Do something with the response
+            })
+            .catch((error) => {
+                console.log(error)
+            });
+        e.preventDefault();
+    });    
+});

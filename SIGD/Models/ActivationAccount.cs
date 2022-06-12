@@ -27,5 +27,6 @@ namespace SIGD.Models
         public bool IsActivated { get; set; }
         public Role role { get; set; }
         public string adminManager { get; set; }
+        public virtual List<FileModel> FileModel { get; set; }
     }
 }

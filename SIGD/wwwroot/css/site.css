@@ -118,8 +118,18 @@ body {
 
 input[type=file]::-webkit-file-upload-button {
     visibility: hidden;
-    width: 450px;
-    height: 200px;
+    height: 180px;
     text-align: center;
-    margin: auto;
+    padding: 0;
+    margin: 0;
+}
+
+#inputFileCard {
+    background-color: #f8f9fa;
+}
+
+#listSelected {
+    height: 100%;
+    max-height: 150px !important;
+    overflow: auto;
 }

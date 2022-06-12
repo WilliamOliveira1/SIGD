@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SIGD.Data;
 
 namespace SIGD.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220611213210_changeFileModel")]
+    partial class changeFileModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,7 +263,8 @@ namespace SIGD.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserUploadId");
+                    b.HasIndex("UserUploadId")
+                        .IsUnique();
 
                     b.ToTable("FilesContext");
                 });
@@ -320,8 +323,8 @@ namespace SIGD.Migrations
             modelBuilder.Entity("SIGD.Models.FileModel", b =>
                 {
                     b.HasOne("SIGD.Models.ActivationAccount", "UserUpload")
-                        .WithMany("FileModel")
-                        .HasForeignKey("UserUploadId")
+                        .WithOne("FileModel")
+                        .HasForeignKey("SIGD.Models.FileModel", "UserUploadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

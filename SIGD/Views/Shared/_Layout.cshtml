@@ -55,14 +55,15 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script id="registerScript" src="~/js/register.js" asp-append-version="true" hidden></script>
     <script id="loginScript" src="~/js/login.js" asp-append-version="true"></script>
     <script src="~/js/swal.js" asp-append-version="true"></script>
     @if (SignInManager.IsSignedIn(User))
     {
-        <script id="usersManagedScript" src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
-        <script id="usersManagedScript" src="~/js/datatables.min.js" asp-append-version="true"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
+        <script src="~/js/datatables.min.js" asp-append-version="true"></script>
     }
     @RenderSection("Scripts", required: false)
 </body>

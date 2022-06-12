@@ -46,20 +46,20 @@ namespace SIGD.Services
                 var userUploadAccount = databaseAccountService.GetActivationAccountByUserName(userUpload);
                 foreach(var user in usersToRead)
                 {
-                    accountUsersToRead.Add(listOfPrincipals.Where(x => x.UserName == user).FirstOrDefault());
-                }
+                    accountUsersToRead.Add(listOfPrincipals.Where(x => x.Email == user).FirstOrDefault());
+                }                
 
-                FileModel fileModel = new FileModel() 
-                { 
-                    UsersToRead = accountUsersToRead,
-                    UserUpload = userUploadAccount
-                };
-
+                List<FileModel> filesList = new List<FileModel>();
+                
                 foreach (var file in filesBytes)
                 {
-                    fileModel.FileName = file.Item2;
-                    fileModel.FileData = file.Item1;
-                    statusList.Add(new Tuple<bool, string>(databaseService.Save(fileModel), file.Item2));
+                    statusList.Add(new Tuple<bool, string>(databaseService.Save(new FileModel()
+                    {
+                        UsersToRead = Newtonsoft.Json.JsonConvert.SerializeObject(accountUsersToRead),
+                        UserUpload = userUploadAccount,
+                        FileName = file.Item2,
+                        FileData = file.Item1
+                    }), file.Item2));
                 }
             }
             catch (Exception ex)
@@ -69,6 +69,21 @@ namespace SIGD.Services
             }            
 
             return statusList;
+        }
+
+        public List<FileModel> GetFiles()
+        {
+            try
+            {
+                List<FileModel> files = new List<FileModel>();
+                files = databaseService.GetAllFiles();
+                return files;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return null;
         }
     }
 }

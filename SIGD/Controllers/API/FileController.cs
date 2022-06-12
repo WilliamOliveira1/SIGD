@@ -22,11 +22,20 @@ namespace SIGD.Controllers.API
 
 
         [HttpPost("savefiles")]
-        public ActionResult SaveFiles(List<string> usersToRead)
-        {            
+        public ActionResult SaveFiles()
+        {
+            List<string> emails = new List<string>();
             try
             {
-                IFormFileCollection files = HttpContext.Request?.Form?.Files;
+                IFormFileCollection files = HttpContext.Request?.Form?.Files;                
+                var dict = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
+                var emailsJoined = dict.Last().Value;
+                var emailArray = emailsJoined.Split(',');
+                foreach(var email in emailArray)
+                {
+                    emails.Add(email);
+                }                
+                
                 if (files.Count() == 0)
                 {
                     return BadRequest("Process Error: No file submitted");
@@ -34,9 +43,23 @@ namespace SIGD.Controllers.API
                 else
                 {
                     string userName = User.Identity.Name;
-                    var listOfSavedFiles = fileService.SaveFile(files, userName, usersToRead);
+                    var listOfSavedFiles = fileService.SaveFile(files, userName, emails);
                     return Ok(listOfSavedFiles);
                 }
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Process Error: {e.Message}"); // Oops!
+            }
+        }
+
+        [HttpGet("getfilesbyuser")]
+        public ActionResult GetFiles()
+        {
+            try
+            {
+                var files = fileService.GetFiles();
+                return Ok(files);
             }
             catch (Exception e)
             {

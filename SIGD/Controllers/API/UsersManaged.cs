@@ -22,7 +22,7 @@ namespace SIGD.Controllers.API
         }
 
         [Authorize]
-        [HttpPost("listallprincipals")]
+        [HttpGet("listallprincipals")]
         public IActionResult GetAllPrincipalsList()
         {
             try
@@ -37,7 +37,7 @@ namespace SIGD.Controllers.API
         }
 
         [Authorize]
-        [HttpPost("listmanaged")]
+        [HttpGet("listmanaged")]
         public IActionResult GetPrincipalsManagedList()
         {
             try

@@ -241,8 +241,8 @@ namespace SIGD.Controllers.API
         {
             bool canSave = false;
 
-            if (string.IsNullOrEmpty(input?["email"]?.ToString()) || string.IsNullOrEmpty(input?["oldpassword"]?.ToString())
-                || string.IsNullOrEmpty(input?["password"]?.ToString()) || string.IsNullOrEmpty(input?["username"]?.ToString()))
+            if ((string.IsNullOrEmpty(input?["email"]?.ToString()) && string.IsNullOrEmpty(input?["username"]?.ToString()))
+                || string.IsNullOrEmpty(input?["password"]?.ToString()) || string.IsNullOrEmpty(input?["oldpassword"]?.ToString()))
             {
                 return StatusCode((int)HttpStatusCode.BadRequest);
             }

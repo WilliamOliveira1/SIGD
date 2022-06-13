@@ -21,27 +21,12 @@ namespace SIGD.Services
         }
 
         public List<Tuple<bool, string>> SaveFile(IFormFileCollection files, string userUpload, List<string> usersToRead)
-        {
-            List<Tuple<byte[], string>> filesBytes = new List<Tuple<byte[], string>>();
+        {            
             ActivationAccount accountUserUpload = new ActivationAccount();
             List<ActivationAccount> accountUsersToRead = new List<ActivationAccount>();
-            List<Tuple<bool, string>> statusList = new List<Tuple<bool, string>>();
+            List<Tuple<bool, string>> statusList = new List<Tuple<bool, string>>();            
             try
-            {
-                foreach (var file in files)
-                {
-                    if (file.Length > 0)
-                    {
-                        using (var ms = new MemoryStream())
-                        {
-                            file.CopyTo(ms);
-                            filesBytes.Add(new Tuple<byte[], string>(ms.ToArray(), file.FileName));
-                            //var fileBytes = ms.ToArray();
-                            //string s = Convert.ToBase64String(fileBytes);
-                            // act on the Base64 data
-                        }
-                    }
-                }
+            {                
                 var listOfPrincipals = databaseAccountService.GetAllPrincipalsAccountsByAdmin(userUpload);
                 var userUploadAccount = databaseAccountService.GetActivationAccountByUserName(userUpload);
                 foreach(var user in usersToRead)
@@ -49,17 +34,30 @@ namespace SIGD.Services
                     accountUsersToRead.Add(listOfPrincipals.Where(x => x.Email == user).FirstOrDefault());
                 }                
 
-                List<FileModel> filesList = new List<FileModel>();
-                
-                foreach (var file in filesBytes)
+                List<string> filesList = new List<string>();
+
+                foreach (var file in files)
                 {
-                    statusList.Add(new Tuple<bool, string>(databaseService.Save(new FileModel()
+                    string filePath = string.Empty;
+                    if (file.Length > 0)
                     {
-                        UsersToRead = Newtonsoft.Json.JsonConvert.SerializeObject(accountUsersToRead),
-                        UserUpload = userUploadAccount,
-                        FileName = file.Item2,
-                        FileData = file.Item1
-                    }), file.Item2));
+                        filePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Files", file.FileName);                        
+                        using (var ms = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(ms);                            
+                            statusList.Add(new Tuple<bool, string>(databaseService.Save(new FileModel()
+                            {
+                                UsersToRead = Newtonsoft.Json.JsonConvert.SerializeObject(accountUsersToRead),
+                                UserUpload = userUploadAccount,
+                                FileName = file.FileName,
+                                FilePath = filePath
+                            }), file.FileName));
+                            filesList.Add(filePath);
+                            //var fileBytes = ms.ToArray();
+                            //string s = Convert.ToBase64String(fileBytes);
+                            // act on the Base64 data
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -84,6 +82,6 @@ namespace SIGD.Services
                 string message = ex.Message;
             }
             return null;
-        }
+        }       
     }
 }

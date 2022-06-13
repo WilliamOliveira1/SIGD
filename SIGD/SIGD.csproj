@@ -45,4 +45,8 @@
     <ProjectReference Include="..\SMTPConfig\SMTPConfig.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Files\" />
+  </ItemGroup>
+
 </Project>

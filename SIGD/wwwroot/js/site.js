@@ -140,6 +140,10 @@
         getFiles();
     });
 
+    $('#downloadFile').click((e) => {
+        downloadFile();
+    });
+
     function getFiles() {
         let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyuser";
 
@@ -150,6 +154,38 @@
                 .done(function (response) {
                     if (response) {
                         setMessage(response);
+                    }
+                    else {
+
+                    }
+                })
+                .fail(function (response) {
+                    setErrorMessage(response.responseJSON);
+                })
+        })
+    }
+
+
+    function downloadFile() {
+        let parameters = {
+            'filename': "rematricula.pdf",
+        };
+
+        let path = BaseApiUrl() + "/api/filemanager/download";
+        return new Promise(function (resolve, reject) {
+            $.post({
+                url: path,
+                data: JSON.stringify(parameters),
+                contentType: 'application/json',
+                //xhrFields: {
+                //    responseType: 'blob'
+                //}
+            })
+                .done(function (response) {
+                    if (response) {
+                        let data = response;
+                        var downloadUrl = URL.createObjectURL(data);
+                        window.location.href = downloadUrl;
                     }
                     else {
 

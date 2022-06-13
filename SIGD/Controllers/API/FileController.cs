@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 
 namespace SIGD.Controllers.API
@@ -27,7 +28,7 @@ namespace SIGD.Controllers.API
             List<string> emails = new List<string>();
             try
             {
-                IFormFileCollection files = HttpContext.Request?.Form?.Files;                
+                IFormFileCollection files = HttpContext.Request?.Form?.Files;
                 var dict = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
                 var emailsJoined = dict.Last().Value;
                 var emailArray = emailsJoined.Split(',');
@@ -65,6 +66,62 @@ namespace SIGD.Controllers.API
             {
                 return BadRequest($"Process Error: {e.Message}"); // Oops!
             }
+        }
+
+        [HttpPost("download")]
+        public async Task<IActionResult> Download(string filename)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(filename))
+                {
+                    var path = Path.Combine(
+                                   Directory.GetCurrentDirectory(),
+                                   "wwwroot", filename);
+
+                    var memory = new MemoryStream();
+                    using (var stream = new FileStream(path, FileMode.Open))
+                    {
+                        await stream.CopyToAsync(memory);
+                    }
+                    memory.Position = 0;
+                    return File(memory, GetContentType(path), Path.GetFileName(path));
+                }
+                else
+                {
+                    return StatusCode(404);
+                }
+            }
+            catch (Exception ex)
+            {
+                string s = ex.Message;
+                return BadRequest();
+            }            
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".xlsx", "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet"},  
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"}
+            };
         }
     }
 }

@@ -141,6 +141,8 @@
     });
 
     $('#downloadFile').click((e) => {
+        e.preventDefault();
+        //window.location = BaseApiUrl() + '/api/filemanager/download/?filename=_leiame.txt';
         downloadFile();
     });
 
@@ -166,26 +168,33 @@
     }
 
 
-    function downloadFile() {
+    function downloadFile(filename) {
         let parameters = {
-            'filename': "rematricula.pdf",
+            'filename': filename,
         };
 
-        let path = BaseApiUrl() + "/api/filemanager/download";
+        let path = BaseApiUrl() + `/api/filemanager/download`;
         return new Promise(function (resolve, reject) {
             $.post({
-                url: path,
-                data: JSON.stringify(parameters),
+                url: path,                
                 contentType: 'application/json',
-                //xhrFields: {
-                //    responseType: 'blob'
-                //}
+                data: JSON.stringify(parameters),
+                xhrFields: {
+                    responseType: 'blob'
+                }
             })
                 .done(function (response) {
                     if (response) {
-                        let data = response;
-                        var downloadUrl = URL.createObjectURL(data);
-                        window.location.href = downloadUrl;
+                        let fileName = parameters.filename;
+                        let file1 = blobToFile(response, fileName)
+                        var a = window.document.createElement('a');
+                        a.href = window.URL.createObjectURL(file1);
+                        a.download = file1.name;
+                        // Append anchor to body.
+                        document.body.appendChild(a);
+                        a.click();
+                        // Remove anchor from body
+                        document.body.removeChild(a);
                     }
                     else {
 
@@ -195,6 +204,10 @@
                     setErrorMessage(response.responseJSON);
                 })
         })
+    }
+
+    function blobToFile(theBlob, fileName) {
+        return new File([theBlob], fileName, { lastModified: new Date().getTime(), type: theBlob.type })
     }
 
     var haveFile = false;

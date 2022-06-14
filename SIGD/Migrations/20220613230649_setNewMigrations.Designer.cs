@@ -9,8 +9,8 @@ using SIGD.Data;
 namespace SIGD.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220604170121_geActivationModel")]
-    partial class geActivationModel
+    [Migration("20220613230649_setNewMigrations")]
+    partial class setNewMigrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -243,6 +243,31 @@ namespace SIGD.Migrations
                     b.ToTable("ActivationAccount");
                 });
 
+            modelBuilder.Entity("SIGD.Models.FileModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<Guid>("UserUploadId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("UsersToRead")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserUploadId");
+
+                    b.ToTable("FilesContext");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -290,6 +315,15 @@ namespace SIGD.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SIGD.Models.FileModel", b =>
+                {
+                    b.HasOne("SIGD.Models.ActivationAccount", "UserUpload")
+                        .WithMany("FileModel")
+                        .HasForeignKey("UserUploadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

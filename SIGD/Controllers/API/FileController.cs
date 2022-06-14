@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using SIGD.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -69,15 +70,18 @@ namespace SIGD.Controllers.API
         }
 
         [HttpPost("download")]
-        public async Task<IActionResult> Download(string filename)
+        public async Task<IActionResult> Download([FromBody] JObject input)
         {
             try
             {
-                if (string.IsNullOrEmpty(filename))
+                //filename = "_leiame.txt";
+                string filename = input?["filename"]?.ToString();
+                if (!string.IsNullOrEmpty(filename))
                 {
+                    
                     var path = Path.Combine(
                                    Directory.GetCurrentDirectory(),
-                                   "wwwroot", filename);
+                                   @"wwwroot\Files", filename);
 
                     var memory = new MemoryStream();
                     using (var stream = new FileStream(path, FileMode.Open))

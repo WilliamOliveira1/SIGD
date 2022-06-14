@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SIGD.Migrations
 {
-    public partial class newRegister : Migration
+    public partial class setNewMigrations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,12 +13,13 @@ namespace SIGD.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    UserName = table.Column<string>(nullable: false),
-                    Email = table.Column<string>(nullable: false),
-                    password = table.Column<string>(nullable: true),
+                    UserName = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    Password = table.Column<string>(nullable: true),
                     passwordExpiration = table.Column<DateTime>(nullable: false),
                     IsActivated = table.Column<bool>(nullable: false),
-                    role = table.Column<int>(nullable: false)
+                    role = table.Column<int>(nullable: false),
+                    adminManager = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,6 +63,27 @@ namespace SIGD.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FilesContext",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    UserUploadId = table.Column<Guid>(nullable: false),
+                    FileName = table.Column<string>(nullable: true),
+                    FilePath = table.Column<string>(nullable: true),
+                    UsersToRead = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FilesContext", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FilesContext_ActivationAccount_UserUploadId",
+                        column: x => x.UserUploadId,
+                        principalTable: "ActivationAccount",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -206,13 +228,15 @@ namespace SIGD.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FilesContext_UserUploadId",
+                table: "FilesContext",
+                column: "UserUploadId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ActivationAccount");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -229,10 +253,16 @@ namespace SIGD.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "FilesContext");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ActivationAccount");
         }
     }
 }

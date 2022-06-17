@@ -1,6 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@model SIGD.Models.ActivationAccount;
+@{
+    ViewBag.Title = "Index";
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -33,9 +37,18 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="MainBoard">Dashboard</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" id="createUserTab" asp-area="" asp-controller="Home" asp-action="CreateUser">Criar usuário</a>
-                            </li>
+                            @if (@Model?.role == Role.Administrator)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" id="createUserTab" asp-area="" asp-controller="Home" asp-action="CreateUser">Criar usuário</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" id="fileManagementTab" asp-area="" asp-controller="Home" asp-action="FileManagementPage">Upload</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" id="fileManagementTab" asp-area="" asp-controller="Home" asp-action="FilesList">Lista de documentos</a>
+                                </li>
+                            }
                         }
                     </ul>
                 </div>
@@ -62,7 +75,13 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <script src="~/js/site.js" asp-append-version="true"></script>
-        <script src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
+        @if (@Model?.role == Role.Administrator)
+        {
+            <script src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
+            <script src="~/js/fileManager.js" asp-append-version="true"></script>
+            <script src="~/js/filesList.js" asp-append-version="true"></script>
+            <script src="~/js/pdfobject.js" asp-append-version="true"></script>
+        }
         <script src="~/js/datatables.min.js" asp-append-version="true"></script>
     }
     @RenderSection("Scripts", required: false)

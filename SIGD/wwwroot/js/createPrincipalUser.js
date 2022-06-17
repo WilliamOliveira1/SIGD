@@ -2,7 +2,7 @@
     let apiPath = BaseApiUrl() + "/api/usersmanaged/listmanaged";
 
     return new Promise(function (resolve, reject) {
-        $.post({
+        $.get({
             url: apiPath,
             contentType: 'application/json'
         })

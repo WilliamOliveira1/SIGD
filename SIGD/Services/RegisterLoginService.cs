@@ -114,9 +114,14 @@ namespace SIGD.Services
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        public ActivationAccount GetUserByUsername(string username)
+        public ActivationAccount GetUserByUsername(string username, bool cleanPass = true)
         {
-            return databaseService.GetActivationAccountByUserName(username);
+            ActivationAccount user = databaseService.GetActivationAccountByUserName(username);
+            if(user != null && cleanPass)
+            {
+                user.Password = null;
+            }            
+            return user;
         }
         
         /// <summary>
@@ -124,9 +129,14 @@ namespace SIGD.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public ActivationAccount GetUserByEmail(string email)
+        public ActivationAccount GetUserByEmail(string email, bool cleanPass = true)
         {
-            return databaseService.GetActivationAccountByEmail(email);
+            ActivationAccount user = databaseService.GetActivationAccountByEmail(email);
+            if (user != null && cleanPass)
+            {
+                user.Password = null;
+            }
+            return user;
         }
 
         /// <summary>
@@ -134,11 +144,20 @@ namespace SIGD.Services
         /// </summary>
         /// <param name="adminManag"></param>
         /// <returns></returns>
-        public List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag)
+        public List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag, bool cleanPass = true)
         {
             try
             {
-                return databaseService.GetAllPrincipalsAccountsByAdmin(adminManag);
+                List<ActivationAccount> users = databaseService.GetAllPrincipalsAccountsByAdmin(adminManag);
+                if (cleanPass)
+                {
+                    foreach (var user in users)
+                    {
+                        user.Password = null;
+                    }
+                }
+
+                return users;
             }
             catch (Exception ex)
             {
@@ -156,16 +175,6 @@ namespace SIGD.Services
         public string GetJWTToken(string Key, string issuer, ActivationAccount account)
         {
             return tokenService.BuildToken(Key, issuer.ToString(), account);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="userModel"></param>
-        /// <returns></returns>
-        public ActivationAccount GetUser(ActivationAccount account)
-        {
-            return databaseService.GetUser(account);
         }
     }
 }

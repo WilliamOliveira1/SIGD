@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SIGD.Interfaces;
+using SIGD.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,7 +62,8 @@ namespace SIGD.Controllers.API
         {
             try
             {
-                var files = fileService.GetFiles();
+                string username = User.Identity.Name;
+                var files = fileService.GetFilesByUser(username);                               
                 return Ok(files);
             }
             catch (Exception e)
@@ -74,11 +77,12 @@ namespace SIGD.Controllers.API
         {
             try
             {
-                //filename = "_leiame.txt";
                 string filename = input?["filename"]?.ToString();
                 if (!string.IsNullOrEmpty(filename))
                 {
-                    
+                    //var files = fileService.GetFiles();
+                    //var file = files.Where(x => x.FileName == filename).FirstOrDefault();
+                    //var path = Path.Combine(file.FilePath, filename);
                     var path = Path.Combine(
                                    Directory.GetCurrentDirectory(),
                                    @"wwwroot\Files", filename);

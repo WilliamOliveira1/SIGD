@@ -49,30 +49,23 @@ namespace SIGD.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="userModel"></param>
-        /// <returns></returns>
-        ActivationAccount GetUser(ActivationAccount userModel);
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        ActivationAccount GetUserByUsername(string username);
+        ActivationAccount GetUserByUsername(string username, bool cleanPass = true);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        ActivationAccount GetUserByEmail(string email);
+        ActivationAccount GetUserByEmail(string email, bool cleanPass = true);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="adminManag"></param>
         /// <returns></returns>
-        List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag);
+        List<ActivationAccount> getAllPrincipalsByAdmin(string adminManag, bool cleanPass = true);
 
         /// <summary>
         /// 

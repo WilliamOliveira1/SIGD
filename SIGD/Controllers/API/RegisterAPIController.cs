@@ -120,11 +120,11 @@ namespace SIGD.Controllers.API
 
                     if (!string.IsNullOrEmpty(email))
                     {
-                        account = registerLoginService.GetUserByEmail(email);
+                        account = registerLoginService.GetUserByEmail(email, false);
                     }
                     else if (!string.IsNullOrEmpty(username))
                     {
-                        account = registerLoginService.GetUserByUsername(username);
+                        account = registerLoginService.GetUserByUsername(username, false);
                     }
 
                     if (account != null)
@@ -146,7 +146,7 @@ namespace SIGD.Controllers.API
                         // TODO lock if get wrong more than 3 times
                         if (account.IsActivated && isMatch)
                         {
-                            var validUser = registerLoginService.GetUser(account);
+                            var validUser = registerLoginService.GetUserByUsername(account.UserName);
                             if (validUser != null)
                             {
                                 generatedToken = registerLoginService.GetJWTToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), validUser);

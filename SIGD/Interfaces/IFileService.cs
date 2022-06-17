@@ -12,5 +12,7 @@ namespace SIGD.Interfaces
         List<Tuple<bool, string>> SaveFile(IFormFileCollection files, string userUpload, List<string> usersToRead);
 
         List<FileModel> GetFiles();
+
+        List<FileModelView> GetFilesByUser(string username);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using SIGD.Interfaces;
 using SIGD.Models;
 using System;
@@ -73,15 +74,50 @@ namespace SIGD.Services
         {
             try
             {
-                List<FileModel> files = new List<FileModel>();
-                files = databaseService.GetAllFiles();
-                return files;
+                return databaseService.GetAllFiles();
             }
             catch (Exception ex)
             {
                 string message = ex.Message;
             }
             return null;
-        }       
+        }
+
+        public List<FileModelView> GetFilesByUser(string username)
+        {
+            try
+            {
+                ActivationAccount user = databaseAccountService.GetActivationAccountByUserName(username);                
+                List<FileModel> files = databaseService.GetAllFiles();
+                files = files.Where(x => x.UserUpload == user).ToList();
+                List<FileModelView> filesView = new List<FileModelView>();
+                List<string> usersToRead = new List<string>();
+
+                foreach (var file in files)
+                {
+                    usersToRead.Clear();
+                    var usersToReadModel = JsonConvert.DeserializeObject<List<ActivationAccount>>(file.UsersToRead);
+                    foreach (ActivationAccount userToRead in usersToReadModel)
+                    {
+                        usersToRead.Add(userToRead.UserName);
+                    }
+
+                    FileModelView convertToFileView = new FileModelView()
+                    {
+                        FileName = file.FileName,
+                        ListOfReaders = usersToRead,
+                        UserUpload = username
+                    };
+                    filesView.Add(convertToFileView);
+                }
+                
+                return filesView;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return null;
+        }
     }
 }

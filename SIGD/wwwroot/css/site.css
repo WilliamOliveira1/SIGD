@@ -133,3 +133,43 @@ input[type=file]::-webkit-file-upload-button {
     max-height: 150px !important;
     overflow: auto;
 }
+
+.fa-check {
+    color: green;
+}
+
+.fa-circle-exclamation {
+    color: red;
+}
+
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 8px 10px; /* e.g. change 8x to 4px here */
+}
+
+select#readerList {
+    border: none;
+}
+
+option {
+    border: none;
+}
+
+#PrincipalFilesTable_length {
+    display: none;
+}
+
+#PrincipalFilesTable_filter {
+    display: none;
+}
+
+th {
+    text-align: center;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.swal-wide {
+    width: 850px !important;
+}

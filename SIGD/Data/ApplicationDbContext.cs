@@ -19,5 +19,6 @@ namespace SIGD.Data
         /// </summary>
         public DbSet<ActivationAccount> ActivationAccount { get; set; }
         public DbSet<FileModel> FilesContext { get; set; }
+        public DbSet<PrincipalFileModelView> FilesViewContext { get; set; }
     }
 }

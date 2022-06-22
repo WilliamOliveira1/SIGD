@@ -1,4 +1,4 @@
-﻿function getUsersList() {
+﻿function getUsersList() {    
     let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyuser";
 
     return new Promise(function (resolve, reject) {
@@ -8,7 +8,32 @@
         })
             .done(function (response) {
                 if (response) {
-                    setDataTableFileList(response);//Create method to load table with users
+                    let obj = JSON.parse(response)
+                    setDataTableFileList(obj);//Create method to load table with users
+                }
+            })
+            .fail(function (response) {
+                setErrorMessage(response.responseJSON);
+            })
+    })
+}
+
+function getPrincipalFilesList(principalEmail) {
+    let parameters = {
+        'useremail': principalEmail,
+    };
+    let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyprincipal";
+
+    return new Promise(function (resolve, reject) {
+        $.post({
+            url: apiPath,
+            contentType: 'application/json',
+            data: JSON.stringify(parameters)
+        })
+            .done(function (response) {
+                if (response) {
+                    let obj = JSON.parse(response)
+                    setDataTablePrincipalsFilesList(obj);//Create method to load table with users
                 }
             })
             .fail(function (response) {
@@ -22,36 +47,42 @@ function BaseApiUrl() {
 }
 
 function setDataTableFileList(accountList) {
-    $('#usersManagedTable').DataTable({
+    $('#usersManagedTable').removeAttr('width').DataTable({
         data: accountList,
-        autoWidth: false,
+        responsive: true,
+        "columnDefs": [
+            { "class": "dt-head-center", "targets": 0 },
+            { "width": "200px", "class": "dt-head-center", "targets": 1 },
+            { "width": "200px", "class": "dt-head-center", "targets": 2 },
+            { "class": "dt-head-center", "targets": 3 }
+        ],
         columns: [
             {
-                data: 'fileName',
+                data: 'FileName',
                 render: function (data, type) {
                     return type === 'display' ? '<span class="ml-3">' + data?.toString() + '</span>' : data;
                 },
             },
             {
-                data: 'fileName',
+                data: 'FileName',
                 render: function (data, type) {
                     return type === 'display' ? `<a id="${data?.toString()}" href="#" action="open" data-toggle="modal" data-target="#exampleModalLong" class="pe-auto open-doc">Abrir documento</a>` : data;
                 },
             },
             {
-                data: 'fileName',
+                data: 'FileName',
                 render: function (data, type) {
                     return type === 'display' ? `<a id="${data?.toString()}" href="#" action="download" class="pe-auto download-doc">Download</a>` : data;
                 },
             },
             {
-                data: 'listOfReaders',
+                data: 'PrincipalsFiles',
                 render: function (data, type) {
                     let i = 1;
                     let select = `<select id="readerList" class="mt-2">`;
                     let option = "";
                     data.forEach((e) => {                        
-                        option = `<option value="position${i}">${e}</option>`
+                        option = `<option value="position${i}">${e.PrincipalEmail}</option>`
                         select = select + option;
                         option = "";
                         i++;
@@ -64,14 +95,71 @@ function setDataTableFileList(accountList) {
     });    
 }
 
-$('#usersManagedTable tbody').on('click', 'a.download-doc', (e) => {
-    console.log(e);
-    let filename = e.currentTarget.attributes[0].nodeValue;
-    console.log(filename);
-    downloadFile(filename);
-})
+function setDataTablePrincipalsFilesList(accountList) {
+    $('#PrincipalFilesTable').DataTable({
+        data: accountList,
+        autoWidth: false,
+        "columnDefs": [
+            { "width": "150px", "class": "dt-head-center", "targets": 0 },
+            { "width": "100px", "class": "dt-head-center","targets": 1 },
+            { "width": "100px", "class": "dt-head-center","targets": 2 },
+            { "width": "80px", "class": "dt-head-center","targets": 3 },
+            { "width": "190px", "class": "dt-head-center","targets": 4 },
+            { "width": "100px", "class": "dt-head-center","targets": 5 },
+        ],
+        responsive: true,
+        "ordering": false,
+        columns: [
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return type === 'display' ? '<span class="ml-3">' + data?.FileName?.toString() + '</span>' : data;
+                },
+            },
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return data?.PrincipalsFiles[0]?.Question ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer"></i>` : `<p class="text-center" title="Não tem pergunta.">---</p>`;
+                },
+            },
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return data?.PrincipalsFiles[0]?.Answer ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer"></i>` : `<p class="text-center" title="Não tem resposta ainda.">---</p>`;
+                },
+            },
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return setStatusIcon(data);
+                },
+            },
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return data?.PrincipalsFiles[0]?.LastTimeOpened !== '0001-01-01T00:00:00' ? `<span class="ml-3">${data?.PrincipalsFiles[0]?.LastTimeOpened?.toString()}</span>` : '<p class="text-center">---</p>';
+                },
+            },
+            {
+                data: 'FileModel',
+                render: function (data, type) {
+                    return setIconAction(data);
+                },
+            },
+        ]
+    });
+}
 
-$('#usersManagedTable tbody').on('click', 'a.open-doc', (e) => {
+$('#tableElement tbody').on('click', '.download-doc', (e) => {
+    let filename = e.currentTarget.attributes[0].nodeValue;
+    downloadFile(filename);
+});
+
+$('#tableElement tbody').on('click', '.write-answer', (e) => {
+    let filename = e.currentTarget.attributes[0];
+});
+
+$('#tableElement tbody').on('click', '.open-doc', (e) => {
     let filename = e.currentTarget.attributes[0].nodeValue;
     let test = filename.includes("pdf");
     if (test) {
@@ -79,8 +167,8 @@ $('#usersManagedTable tbody').on('click', 'a.open-doc', (e) => {
     }
     else {
         openFile(filename);
-    }    
-})
+    }
+});
 
 function downloadFile(filename) {
     let parameters = {
@@ -146,7 +234,8 @@ function openPDFFile(filename) {
                         var fileURL = URL.createObjectURL(file1);
                         $("#embedPDF").attr("src", fileURL);                        
                         $("#embedPDF").attr("hidden", false);
-                    }              
+                    }
+                    $("#exampleModalLongTitle").html(filename);
                     $("#modalButton").click();
                 }
             })
@@ -173,6 +262,7 @@ function openFile(filename) {
                     $(".modal-body").empty();
                     $("#embedPDF").attr("hidden", true);
                     $(".modal-body").append(response);
+                    $("#exampleModalLongTitle").html(filename);
                     $("#modalButton").click();
                 }
             })
@@ -186,9 +276,48 @@ function blobToFile(blob, fileName) {
     return new File([blob], fileName, { lastModified: new Date().getTime(), type: blob.type })
 }
 
+$('#principalsFilesSelect').click((e) => {
+    let conceptName = $('#principalsList').find(":selected");
+    let optionSelected = conceptName[0].innerHTML;
+    let isEmailSelected = isEmail(optionSelected);
+    $("#PrincipalFilesTable").DataTable().clear().destroy();
+    $("#usersManagedTable").DataTable().clear().destroy();    
+    if (isEmailSelected) {
+        $("#PrincipalFilesTable").attr("hidden", false);
+        $("#usersManagedTable").attr("hidden", true);
+        getPrincipalFilesList(optionSelected);
+    }
+    else {
+        $("#PrincipalFilesTable").attr("hidden", true);
+        $("#usersManagedTable").attr("hidden", false);
+        getUsersList();
+    }    
+});
+
+function isEmail(email) {
+    let regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+    return regex.test(email);
+}
+
+function setIconAction(data) {
+    let iconCell = "";
+    if (data?.FileName) {
+        let openIcon = `<i id="${data.FileName.toString()}" action="open" data-toggle="modal" data-target="#exampleModalLong" class="ml-2 fa-solid fa-book-open fa-xl open-doc pointer" title="Abrir documento"></i>`;
+        let downloadIcon = `<i id="${data.FileName.toString()}" action="download" class="ml-2 fa-solid fa-download fa-xl download-doc pb-2 pointer" title="Download do documento"></i>`;
+        iconCell = iconCell + openIcon;
+        iconCell = iconCell + downloadIcon;
+    }
+    return iconCell;
+}
+
+function setStatusIcon(data) {
+    return data?.PrincipalsFiles[0]?.Status ? `<i class="fa-regular fa-circle-check ml-3 fa-beat fa-xl pointer" title="Documento lido"></i>` : `<i class="fa-solid fa-circle-exclamation ml-3 fa-beat fa-xl pointer" title="Documento não lido"></i>`;
+}
+
 $(document).ready(function () {
     if (window.location.href.indexOf("FilesList") > -1) {
         getUsersList();
     }
     $("#embedPDF").attr("hidden", true);
+    $("#PrincipalFilesTable").attr("hidden", true);
 });

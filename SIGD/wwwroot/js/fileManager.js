@@ -42,14 +42,25 @@
             })
             .then((response) => {
                 return response.json().then((data) => {
-                    console.log(data);
                     return data;
                 }).catch((err) => {
                     console.log(err);
                 })
             })
             .then((responseJson) => {
-                // Do something with the response
+                let message = "";
+                let status = false;
+                if (responseJson === true) {
+                    message = "Todos arquivos foram salvos.";
+                    status = true;
+                }
+                else if (responseJson === false) {
+                    message = "Devido a um erro nenhum arquivo foi salvo, por favor tente novamente!";
+                }
+                else {
+                    message = responseJson
+                }                
+                setMessage(message, status);
             })
             .catch((error) => {
                 console.log(error)
@@ -152,11 +163,6 @@
         getFiles();
     });
 
-    $('#downloadFile').click((e) => {
-        e.preventDefault();
-        downloadFile();
-    });
-
     function getFiles() {
         let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyuser";
 
@@ -177,51 +183,45 @@
                 })
         })
     }
-
-
-    function downloadFile(filename) {
-        let parameters = {
-            'filename': filename,
-        };
-
-        let path = BaseApiUrl() + `/api/filemanager/download`;
-        return new Promise(function (resolve, reject) {
-            $.post({
-                url: path,                
-                contentType: 'application/json',
-                data: JSON.stringify(parameters),
-                xhrFields: {
-                    responseType: 'blob'
-                }
-            })
-                .done(function (response) {
-                    if (response) {
-                        let fileName = parameters.filename;
-                        let file1 = blobToFile(response, fileName)
-                        var a = window.document.createElement('a');
-                        a.href = window.URL.createObjectURL(file1);
-                        a.download = file1.name;
-                        // Append anchor to body.
-                        document.body.appendChild(a);
-                        a.click();
-                        // Remove anchor from body
-                        document.body.removeChild(a);
-                    }
-                    else {
-
-                    }
-                })
-                .fail(function (response) {
-                    setErrorMessage(response.responseJSON);
-                })
-        })
-    }
-
-    function blobToFile(blob, fileName) {
-        return new File([blob], fileName, { lastModified: new Date().getTime(), type: blob.type })
-    }
-
+    
     var haveFile = false;
     var havePrincipal = false;
     $("#fileSubmit").prop('disabled', true);
+
+    function setMessage(message, status) {
+        let title = status ? "Sucesso!" : "Erro!";
+        let icon = status ? "success" : "error";        
+        let str = "";
+        console.log(typeof message);
+        
+        if (typeof message === "object") {
+            message.forEach((e) => {
+                str = str + e;
+            });
+        }
+        else {
+            str = message;
+        }
+        
+
+        let timerInterval = str.length * 50 > 5000 ? str.length * 50 : 5000;
+        console.log(timerInterval);
+        Swal.fire({
+            customClass: {
+                popup: 'format-pre'
+            },
+            title: title,
+            icon: icon,
+            html: '<span>' + str + '</span>',
+            customClass: 'swal-wide',
+            confirmButtonText: 'Fechar',
+            showCloseButton: true,
+            timer: timerInterval,
+            timerProgressBar: true,
+            willClose: () => {
+                clearInterval(timerInterval)
+                window.location.reload();
+            }
+        })
+    }
 });

@@ -5,6 +5,7 @@ using SIGD.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +14,6 @@ namespace SIGD.Services
     public class FilesRepository : IFilesRepository
     {
         private ApplicationDbContext _context;
-        public IConfiguration Configuration { get; }
         public FilesRepository(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -25,7 +25,7 @@ namespace SIGD.Services
         /// <param name="data"></param>
         /// <returns>true if data saved</returns>
         /// <returns>false otherwise</returns>
-        public bool Save(FileModel data)
+        public FileModel Save(FileModel data)
         {
             try
             {                
@@ -40,11 +40,53 @@ namespace SIGD.Services
                 }
                 _context.SaveChanges();
                 
+                return data;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Remove file model from database
+        /// </summary>
+        /// <param name="filename">name and extension of file</param>
+        /// <returns>true if removed and false otherwise</returns>
+        public bool DeleteByFileName(string filename)
+        {
+            try
+            {
+                var modelData = GetFileByFileName(filename);
+                _context.Remove(modelData);
                 return true;
             }
-            catch (Exception ex)
-            {                
-                throw ex;                
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove file model from database
+        /// </summary>
+        /// <param name="id">id of file model</param>
+        /// <returns>true if removed and false otherwise</returns>
+        public bool DeleteFileById(Guid id)
+        {
+            try
+            {
+                var modelData = GetFileById(id);
+                if (File.Exists(modelData.FilePath))
+                {
+                    File.Delete(modelData.FilePath);
+                }
+                _context.Remove(modelData);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -111,6 +153,6 @@ namespace SIGD.Services
         public List<FileModel> GetAllFiles()
         {
            return _context.FilesContext.ToList();
-        }       
+        }
     }
 }

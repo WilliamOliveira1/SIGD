@@ -31,6 +31,14 @@
   <ItemGroup>
     <Compile Remove="Migrations\20220613230508_setMigration.cs" />
     <Compile Remove="Migrations\20220613230508_setMigration.Designer.cs" />
+    <Compile Remove="Migrations\20220619134216_setPrincipalFileViewModel.cs" />
+    <Compile Remove="Migrations\20220619134216_setPrincipalFileViewModel.Designer.cs" />
+    <Compile Remove="Migrations\20220619134619_changeFileModel.cs" />
+    <Compile Remove="Migrations\20220619134619_changeFileModel.Designer.cs" />
+    <Compile Remove="Migrations\20220619161556_changeFileViewModelProperty.cs" />
+    <Compile Remove="Migrations\20220619161556_changeFileViewModelProperty.Designer.cs" />
+    <Compile Remove="Migrations\20220619161707_changeFileViewModelProperty.cs" />
+    <Compile Remove="Migrations\20220619161707_changeFileViewModelProperty.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +59,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\Files\" />
   </ItemGroup>
 

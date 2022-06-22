@@ -35,6 +35,7 @@ namespace SIGD.Controllers.API
                 var dict = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
                 var emailsJoined = dict.Last().Value;
                 var emailArray = emailsJoined.Split(',');
+                bool notPermitedType = false;
                 foreach(var email in emailArray)
                 {
                     emails.Add(email);
@@ -46,9 +47,30 @@ namespace SIGD.Controllers.API
                 }
                 else
                 {
+                    notPermitedType = GetPermitedTypes(files);
+
+                    if (!notPermitedType)
+                    {
+                        List<string> message = new List<string>()
+                        {
+                            "Um ou mais arquivos com extensão não permitida, por favor tente novamente.<br>",
+                            "Formatos permitidos: <br>",
+                            ".txt, .pdf <br>"
+                        };
+                        return BadRequest(message);
+                    }
+                    
                     string userName = User.Identity.Name;
                     var listOfSavedFiles = fileService.SaveFile(files, userName, emails);
-                    return Ok(listOfSavedFiles);
+                    if(listOfSavedFiles.Where(x => x.Item2.Contains("File name already in DB.")).ToList().Count > 0)
+                    {
+                        var error = listOfSavedFiles.Where(x => x.Item2.Contains("File name already in DB.")).FirstOrDefault();
+                        string[] fileNameError = error.Item2.Split(".");
+                        return BadRequest($"Arquivo com nome salvo no banco, por favor mude o nome do arquivo: [ {fileNameError[1]} ] e tente novamente:");
+                    }
+
+                    bool filesWasSaved = listOfSavedFiles != null && listOfSavedFiles.Count > 0 ? true : false;
+                    return Ok(filesWasSaved);
                 }
             }
             catch (Exception e)
@@ -63,8 +85,32 @@ namespace SIGD.Controllers.API
             try
             {
                 string username = User.Identity.Name;
-                var files = fileService.GetFilesByUser(username);                               
-                return Ok(files);
+                var files = fileService.GetFilesBySupervisorUsername(username);
+                var test = JsonConvert.SerializeObject(files, Formatting.None,
+                        new JsonSerializerSettings()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        });
+                return Ok(test);
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Process Error: {e.Message}"); // Oops!
+            }
+        }
+
+        [HttpPost("getfilesbyprincipal")]
+        public ActionResult GetFilesbyPrincipal([FromBody] JObject input)
+        {
+            try
+            {
+                string useremail = input?["useremail"]?.ToString(); ;
+                var files = fileService.GetFilesByPrincipalUsername(useremail);
+                return Ok(JsonConvert.SerializeObject(files, Formatting.None,
+                        new JsonSerializerSettings()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }));
             }
             catch (Exception e)
             {
@@ -80,9 +126,6 @@ namespace SIGD.Controllers.API
                 string filename = input?["filename"]?.ToString();
                 if (!string.IsNullOrEmpty(filename))
                 {
-                    //var files = fileService.GetFiles();
-                    //var file = files.Where(x => x.FileName == filename).FirstOrDefault();
-                    //var path = Path.Combine(file.FilePath, filename);
                     var path = Path.Combine(
                                    Directory.GetCurrentDirectory(),
                                    @"wwwroot\Files", filename);
@@ -93,7 +136,7 @@ namespace SIGD.Controllers.API
                         await stream.CopyToAsync(memory);
                     }
                     memory.Position = 0;
-                    return File(memory, GetContentType(path), Path.GetFileName(path));
+                    return File(memory, fileService.GetContentType(path), Path.GetFileName(path));
                 }
                 else
                 {
@@ -105,31 +148,34 @@ namespace SIGD.Controllers.API
                 string s = ex.Message;
                 return BadRequest();
             }            
-        }
+        }        
 
-        private string GetContentType(string path)
+        private bool GetPermitedTypes(IFormFileCollection files)
         {
-            var types = GetMimeTypes();
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-            return types[ext];
-        }
-
-        private Dictionary<string, string> GetMimeTypes()
-        {
-            return new Dictionary<string, string>
+            bool isPermited = false;
+            foreach (var file in files)
             {
-                {".txt", "text/plain"},
-                {".pdf", "application/pdf"},
-                {".doc", "application/vnd.ms-word"},
-                {".docx", "application/vnd.ms-word"},
-                {".xls", "application/vnd.ms-excel"},
-                {".xlsx", "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet"},  
-                {".png", "image/png"},
-                {".jpg", "image/jpeg"},
-                {".jpeg", "image/jpeg"},
-                {".gif", "image/gif"},
-                {".csv", "text/csv"}
-            };
+                var fileType = fileService.GetContentType(file.FileName);
+                foreach (var type in fileService.PermitedTypes())
+                {
+                    if (file.ContentType == type && file.ContentType == fileType)
+                    {
+                        isPermited = true;
+                    }
+
+                    if (isPermited)
+                    {
+                        break;
+                    }
+                }
+
+                if (isPermited)
+                {
+                    break;
+                }
+            }
+
+            return isPermited;
         }
     }
 }

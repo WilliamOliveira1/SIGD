@@ -5,11 +5,33 @@
             <option value="0">Todas escolas</option>
         </select>
         <div class="ml-3 mt-3">
-            <button id="principalsSelect" class="btn btn-primary">Selecionar</button>
+            <button id="principalsFilesSelect" class="btn btn-primary">Selecionar</button>
         </div>
     </div>
 </div>
-<div class="row mt-5">
+<div id="tableElement" class="row mt-5">
+    <table id="PrincipalFilesTable" class="display table-striped table-bordered cell-border hover">
+        <thead>
+            <tr>
+                <th class="ml-3">Nome do arquivo</th>
+                <th class="ml-3">Pergunta</th>
+                <th class="ml-3">Resposta</th>
+                <th class="ml-3">Status</th>
+                <th class="ml-3">Data da leitura</th>
+                <th class="ml-3">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="margin-left-table">Nome do arquivo</td>
+                <td class="margin-left-table">Pergunta</td>
+                <td class="margin-left-table">Resposta</td>
+                <td class="margin-left-table">Status</td>
+                <td class="margin-left-table">Data da leitura</td>
+                <td class="margin-left-table">Ações</td>
+            </tr>
+        </tbody>
+    </table>
     <table id="usersManagedTable" class="display table-striped table-bordered cell-border hover">
         <thead>
             <tr>
@@ -21,10 +43,10 @@
         </thead>
         <tbody>
             <tr>
-                <td id="download" class="margin-left-table">Nome do arquivo</td>
-                <td id="download" class="margin-left-table">Abrir</td>
-                <td id="download" class="margin-left-table">Download</td>
-                <td id="download" class="margin-left-table">Lista para leitura</td>
+                <td class="margin-left-table">Nome do arquivo</td>
+                <td class="margin-left-table">Abrir</td>
+                <td class="margin-left-table">Download</td>
+                <td class="margin-left-table">Lista para leitura</td>
             </tr>
         </tbody>
     </table>

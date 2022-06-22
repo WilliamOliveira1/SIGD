@@ -13,6 +13,14 @@ namespace SIGD.Interfaces
 
         List<FileModel> GetFiles();
 
-        List<FileModelView> GetFilesByUser(string username);
+        List<PrincipalFileModelView> GetFilesByPrincipalUsername(string username);
+
+        List<FileModel> GetFilesBySupervisorUsername(string username);
+
+        string GetContentType(string path);
+
+        Dictionary<string, string> GetMimeTypes();
+
+        List<string> PermitedTypes();
     }
 }

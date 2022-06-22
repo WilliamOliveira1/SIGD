@@ -3,7 +3,7 @@
 
 namespace SIGD.Models
 {
-    public class FileModelView
+    public class SupervisorFileModelView
     {
         public string FileName { get; set; }
         public List<string> ListOfReaders { get; set; }

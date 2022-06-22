@@ -1,13 +1,12 @@
 ﻿using SIGD.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SIGD.Interfaces
 {
     public interface IFilesRepository
     {
-        bool Save(FileModel data);
+        FileModel Save(FileModel data);
 
         FileModel GetFileByFileName(string fileName);
 
@@ -16,5 +15,19 @@ namespace SIGD.Interfaces
         List<FileModel> GetAllFiles();
 
         bool SaveList(List<FileModel> data);
+
+        /// <summary>
+        /// Remove file model from database
+        /// </summary>
+        /// <param name="filename">name and extension of file</param>
+        /// <returns>true if removed and false otherwise</returns>
+        bool DeleteByFileName(string filename);
+
+        /// <summary>
+        /// Remove file model from database
+        /// </summary>
+        /// <param name="id">id of file model</param>
+        /// <returns>true if removed and false otherwise</returns>
+        bool DeleteFileById(Guid id);
     }
 }

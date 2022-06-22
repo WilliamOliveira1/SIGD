@@ -54,6 +54,7 @@ namespace SIGD
             services.AddScoped<IUsersManagedService, UsersManagedService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IFilesRepository, FilesRepository>();
+            services.AddScoped<IPrincipalFileModelViewRepository, PrincipalFileModelViewRepository>();
             services.AddSession(
                 x =>
                 { x.IdleTimeout = TimeSpan.FromMilliseconds(600000); })

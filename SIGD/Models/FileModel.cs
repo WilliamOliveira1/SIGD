@@ -10,8 +10,8 @@ namespace SIGD.Models
         public Guid UserUploadId { get; set; }
         public Guid Id { get; set; }
         public string FileName { get; set; }
-        public string FilePath { get; set; }
-        public string UsersToRead { get; set; }
-        public virtual ActivationAccount UserUpload { get; set; }        
+        public string FilePath { get; set; }        
+        public virtual ActivationAccount UserUpload { get; set; }
+        public virtual List<PrincipalFileModelView> PrincipalsFiles { get; set; }
     }
 }

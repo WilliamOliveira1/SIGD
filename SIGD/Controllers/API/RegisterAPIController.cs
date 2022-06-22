@@ -258,11 +258,11 @@ namespace SIGD.Controllers.API
 
                 if (!string.IsNullOrEmpty(email))
                 {
-                    account = registerLoginService.GetUserByEmail(email);
+                    account = registerLoginService.GetUserByEmail(email, false);
                 }
                 else if (!string.IsNullOrEmpty(username))
                 {
-                    account = registerLoginService.GetUserByUsername(username);
+                    account = registerLoginService.GetUserByUsername(username, false);
                 }
                 
                 if (account != null)

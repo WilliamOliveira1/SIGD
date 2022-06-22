@@ -50,12 +50,12 @@ function setDataTableFileList(accountList) {
     $('#usersManagedTable').removeAttr('width').DataTable({
         data: accountList,
         responsive: true,
+        "language": translation,
         "columnDefs": [
             { "class": "dt-head-center", "targets": 0 },
             { "width": "200px", "class": "dt-head-center", "targets": 1 },
-            { "width": "200px", "class": "dt-head-center", "targets": 2 },
-            { "class": "dt-head-center", "targets": 3 }
-        ],
+            { "class": "dt-head-center", "targets": 2 }
+        ],        
         columns: [
             {
                 data: 'FileName',
@@ -64,24 +64,12 @@ function setDataTableFileList(accountList) {
                 },
             },
             {
-                data: 'FileName',
-                render: function (data, type) {
-                    return type === 'display' ? `<a id="${data?.toString()}" href="#" action="open" data-toggle="modal" data-target="#exampleModalLong" class="pe-auto open-doc">Abrir documento</a>` : data;
-                },
-            },
-            {
-                data: 'FileName',
-                render: function (data, type) {
-                    return type === 'display' ? `<a id="${data?.toString()}" href="#" action="download" class="pe-auto download-doc">Download</a>` : data;
-                },
-            },
-            {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
                     let i = 1;
                     let select = `<select id="readerList" class="mt-2">`;
                     let option = "";
-                    data.forEach((e) => {                        
+                    data.forEach((e) => {
                         option = `<option value="position${i}">${e.PrincipalEmail}</option>`
                         select = select + option;
                         option = "";
@@ -90,7 +78,26 @@ function setDataTableFileList(accountList) {
                     select.concat("</select>");
                     return type === 'display' ? select : data;
                 },
-            }
+            },
+            {
+                data: 'FileName',
+                render: function (data, type) {
+                    return setIconAction(data);
+                },
+            },
+            //{
+            //    data: 'FileName',
+            //    render: function (data, type) {
+            //        return type === 'display' ? `<a id="${data?.toString()}" href="#" action="open" data-toggle="modal" data-target="#exampleModalLong" class="pe-auto open-doc">Abrir documento</a>` : data;
+            //    },
+            //},
+            //{
+            //    data: 'FileName',
+            //    render: function (data, type) {
+            //        return type === 'display' ? `<a id="${data?.toString()}" href="#" action="download" class="pe-auto download-doc">Download</a>` : data;
+            //    },
+            //},
+            
         ]
     });    
 }
@@ -98,14 +105,15 @@ function setDataTableFileList(accountList) {
 function setDataTablePrincipalsFilesList(accountList) {
     $('#PrincipalFilesTable').DataTable({
         data: accountList,
+        "language": translation,
         autoWidth: false,
         "columnDefs": [
             { "width": "150px", "class": "dt-head-center", "targets": 0 },
-            { "width": "100px", "class": "dt-head-center","targets": 1 },
-            { "width": "100px", "class": "dt-head-center","targets": 2 },
+            { "width": "190px", "class": "dt-head-center","targets": 1 },
+            { "width": "190px", "class": "dt-head-center","targets": 2 },
             { "width": "80px", "class": "dt-head-center","targets": 3 },
             { "width": "190px", "class": "dt-head-center","targets": 4 },
-            { "width": "100px", "class": "dt-head-center","targets": 5 },
+            { "width": "120px", "class": "dt-head-center","targets": 5 },
         ],
         responsive: true,
         "ordering": false,
@@ -307,6 +315,12 @@ function setIconAction(data) {
         iconCell = iconCell + openIcon;
         iconCell = iconCell + downloadIcon;
     }
+    else if (data) {
+        let openIcon = `<i id="${data.toString()}" action="open" data-toggle="modal" data-target="#exampleModalLong" class="ml-2 fa-solid fa-book-open fa-xl open-doc pointer" title="Abrir documento"></i>`;
+        let downloadIcon = `<i id="${data.toString()}" action="download" class="ml-2 fa-solid fa-download fa-xl download-doc pb-2 pointer" title="Download do documento"></i>`;
+        iconCell = iconCell + openIcon;
+        iconCell = iconCell + downloadIcon;
+    }
     return iconCell;
 }
 
@@ -319,5 +333,30 @@ $(document).ready(function () {
         getUsersList();
     }
     $("#embedPDF").attr("hidden", true);
-    $("#PrincipalFilesTable").attr("hidden", true);
+    $("#PrincipalFilesTable").attr("hidden", true);    
 });
+
+var translation = {
+    "sProcessing": "Processando...",
+    "sLengthMenu": "Mostrar _MENU_ registros",
+    "sZeroRecords": "Não foi encontrado resultados",
+    "sEmptyTable": "Nenhum documento salvo",
+    "sInfo": "Mostrando registros de _START_ até _END_ de um total de _TOTAL_ registros",
+    "sInfoEmpty": "Mostrando registros de 0 até 0 de um total de 0 registros",
+    "sInfoFiltered": "(filtrado de um total de _MAX_ registros)",
+    "sInfoPostFix": "",
+    "sSearch": "Pesquisar:",
+    "sUrl": "",
+    "sInfoThousands": ",",
+    "sLoadingRecords": "Carregando...",
+    "oPaginate": {
+        "sFirst": "Primeiro",
+        "sLast": "Ultimo",
+        "sNext": "Seguinte",
+        "sPrevious": "Anterior"
+    },
+    "oAria": {
+        "sSortAscending": ": Ativar para ordenar coluna de forma ascendente",
+        "sSortDescending": ": Ativar para ordenar coluna de forma descendente"
+    }
+}

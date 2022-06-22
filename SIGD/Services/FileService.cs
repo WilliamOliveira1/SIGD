@@ -163,9 +163,16 @@ namespace SIGD.Services
 
         public string GetContentType(string path)
         {
-            var types = GetMimeTypes();
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-            return !string.IsNullOrEmpty(ext) ? types[ext] : ext;
+            try
+            {
+                var types = GetMimeTypes();
+                var ext = Path.GetExtension(path).ToLowerInvariant();
+                return !string.IsNullOrEmpty(ext) ? types[ext] : ext;
+            }
+            catch (Exception)
+            {
+                return "";
+            }            
         }
 
         public Dictionary<string, string> GetMimeTypes()

@@ -24,6 +24,7 @@ function BaseApiUrl() {
 function setDataTable(accountList) {
     $('#usersManagedTable').DataTable({
         data: accountList,
+        "language": translation,
         autoWidth: false,
         columns: [
             {
@@ -56,5 +57,30 @@ function setDataTable(accountList) {
 $(document).ready(function () {
     if (window.location.href.indexOf("CreateUser") > -1) {
         getUsersListManaged();
-    }
+    }    
 });
+
+//var translation = {
+//    "sProcessing": "Processando...",
+//    "sLengthMenu": "Mostrar _MENU_ registros",
+//    "sZeroRecords": "Não foi encontrado resultados",
+//    "sEmptyTable": "Nenhum documento salvo",
+//    "sInfo": "Mostrando registros de _START_ até _END_ de um total de _TOTAL_ registros",
+//    "sInfoEmpty": "Mostrando registros de 0 até 0 de um total de 0 registros",
+//    "sInfoFiltered": "(filtrado de um total de _MAX_ registros)",
+//    "sInfoPostFix": "",
+//    "sSearch": "Pesquisar:",
+//    "sUrl": "",
+//    "sInfoThousands": ",",
+//    "sLoadingRecords": "Carregando...",
+//    "oPaginate": {
+//        "sFirst": "Primeiro",
+//        "sLast": "Ultimo",
+//        "sNext": "Seguinte",
+//        "sPrevious": "Anterior"
+//    },
+//    "oAria": {
+//        "sSortAscending": ": Ativar para ordenar coluna de forma ascendente",
+//        "sSortDescending": ": Ativar para ordenar coluna de forma descendente"
+//    }
+//}

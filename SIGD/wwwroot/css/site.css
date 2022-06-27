@@ -173,3 +173,8 @@ th {
 .swal-wide {
     width: 850px !important;
 }
+
+textarea {
+    width: 150px;
+    height: 400px;
+}

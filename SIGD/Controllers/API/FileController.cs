@@ -156,6 +156,25 @@ namespace SIGD.Controllers.API
             }
         }
 
+        [HttpPost("sendFileQuestion")]
+        public ActionResult SendFileQuestion([FromBody] JObject input)
+        {
+            try
+            {
+                string filename = input?["filename"]?.ToString();
+                string message = input?["message"]?.ToString();
+                var status = fileService.SaveFileQuestion(filename, message);
+                if (!status)
+                    return BadRequest($"{SharedMessages.ERROR_SAVING_READING_STATUS}");
+                else
+                    return Ok(SharedMessages.READING_STATUS_SAVED);
+            }
+            catch (Exception)
+            {
+                return BadRequest($"{SharedMessages.ERROR_SAVING_READING_STATUS}");
+            }
+        }
+
         [HttpPost("download")]
         public async Task<IActionResult> Download([FromBody] JObject input)
         {

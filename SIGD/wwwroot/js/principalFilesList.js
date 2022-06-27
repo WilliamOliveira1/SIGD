@@ -47,6 +47,32 @@ function changeReadingStatus(filename) {
     })
 }
 
+function sendFileQuestion(filename, message) {
+    let parameters = {
+        'filename': filename,
+        'message': message
+    };
+    let apiPath = BaseApiUrl() + "/api/filemanager/sendFileQuestion";
+
+    return new Promise(function (resolve, reject) {
+        $.post({
+            url: apiPath,
+            contentType: 'application/json',
+            data: JSON.stringify(parameters)
+        })
+            .done(function (response) {
+                if (response) {
+                    $('#exampleModalMessageLong').modal('hide');
+                    setMessage(response);
+                }
+            })
+            .fail(function (response) {
+                $('#exampleModalMessageLong').modal('hide');
+                setErrorMessage(response.responseJSON);
+            })
+    })
+}
+
 function BaseApiUrl() {
     return window.location.origin;
 }
@@ -77,7 +103,13 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
-                    let renderCell = data[0]?.Question ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer"></i>` : `<i id="question${addNumber}" class="fa-solid fa-clipboard-question fa-xl pointer ml-4 open-question"></i>`;
+                    let renderCell = "";
+                    if (data[0]?.Question) {
+                        renderCell = `<i id="${data[0].Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer edit-question ml-4"></i>`;
+                    }
+                    else {
+                        renderCell = `<i id="question${addNumber}" class="fa-solid fa-clipboard-question fa-xl pointer ml-4 open-question"></i>`;
+                    }                    
                     addNumber++;
                     return renderCell;
                 },
@@ -127,6 +159,31 @@ $('#tableElement tbody').on('click', '.download-doc', (e) => {
     downloadFile(filename);
 });
 
+$('#modalQAFooter').on('click', '#sendQuestion', (e) => {
+    let modalTitle = $("#ModalQALongTitle")[0].childNodes[0].nodeValue.split(" - ");
+    let filename = modalTitle[1];
+    let messageTextArea = $("#inputMessage").val();
+    let message = "";
+    var eachLine = messageTextArea.split('\n');
+    eachLine.forEach((e) => {
+        if (e) {
+            message = message ? `${message}-newBreakline-${e}` : `${message}${e}`;
+        }
+    });
+    let messageTitle = $("#inputMessageTitle").val();
+    var currentdate = new Date();
+    let hours = currentdate.getHours().lenght === 1 ? `0${currentdate.getHours()}` : `${currentdate.getHours()}:`;
+    let minutes = currentdate.getMinutes().lenght === 1 ? `0${currentdate.getMinutes()}` : `${currentdate.getMinutes()}`;
+    var datetime = currentdate.getDate() + "/"
+        + (currentdate.getMonth() + 1) + "/"
+        + currentdate.getFullYear() + " - "
+        + hours +
+        + minutes;
+    let question = `${messageTitle}<>:${message}<>:${datetime.toString()}`
+    sendFileQuestion(filename, question);
+    e.preventDefault();
+});
+
 $('#tableElement tbody').on('click', '.write-answer', (e) => {
     let filename = e.currentTarget.attributes[0];
 });
@@ -155,6 +212,27 @@ $('#tableElement tbody').on('click', '.open-question', (e) => {
     $("#modalQAFooter").append(buttonConfirm);
     $("#ModalQALongTitle").empty();
     $("#ModalQALongTitle").text(`Enviar pergunta arquivo - ${rowData.FileName}`);
+});
+
+$('#tableElement tbody').on('click', '.edit-question', (e) => {
+    $("#modalFile").empty();
+    $("#exampleModalLongTitle").empty();
+    let id = e.currentTarget.attributes[0].nodeValue;
+    let row = $(`#${id}`).parents('tr')[0];
+    let rowData = table.row(row).data();
+    let questionRow = rowData.PrincipalsFiles[0].Question.split("<>:")
+    let questionLines = questionRow[1].split("-newBreakline-");
+    let questionMessage = "";
+    questionLines.forEach((e) => {
+        if (e) {
+            questionMessage = questionMessage + `<div><span id="editQuestionModal">${e}</span></div>`;
+        }
+    });    
+    let questionDate = `<div><span id="editQuestionModal">Pergunta salva na data: ${questionRow[2].toString().split("Last Sync: ").pop()}</span></div>`;
+    $("#exampleModalLongTitle").text(questionRow[0]);
+    $("#modalFile").append(questionMessage);
+    $("#modalFile").append(questionDate);
+    $("#modalButton").click();
 });
 
 $('#exampleModalLong').on('click', '#confirmReadingStatus', (e) => {

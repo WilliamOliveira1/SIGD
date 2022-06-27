@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SIGD.Helper;
 using SIGD.Interfaces;
 using SIGD.Models;
 using System;
@@ -144,11 +145,14 @@ namespace SIGD.Controllers.API
             {
                 string filename = input?["filename"]?.ToString();
                 var status = fileService.ChangeReadingStatus(filename);
-                return Ok(status);
+                if (!status)
+                    return BadRequest($"{SharedMessages.ERROR_SAVING_READING_STATUS}");
+                else                    
+                    return Ok(SharedMessages.READING_STATUS_SAVED);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return BadRequest($"Process Error: {e.Message}"); // Oops!
+                return BadRequest($"{SharedMessages.ERROR_SAVING_READING_STATUS}");
             }
         }
 

@@ -52,26 +52,6 @@ $('#RegisterSubmit').click(function () {
     createNewAdminUser(username, email);
 });
 
-function BaseApiUrl() {
-    return window.location.origin;
-}
-
-function setErrorMessage(message) {
-    let timerInterval
-    Swal.fire({
-        title: 'Erro!',
-        text: message,
-        icon: 'error',
-        confirmButtonText: 'Fechar',
-        showCloseButton: true,
-        timer: 3500,
-        timerProgressBar: true,
-        willClose: () => {
-            clearInterval(timerInterval)
-        }
-    })
-}
-
 $("#InputUsernameRegister, #InputEmailRegister").on('input', function () {
     registerForm();
 });

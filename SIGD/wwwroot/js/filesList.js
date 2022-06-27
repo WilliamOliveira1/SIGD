@@ -42,10 +42,6 @@ function getPrincipalFilesList(principalEmail) {
     })
 }
 
-function BaseApiUrl() {
-    return window.location.origin;
-}
-
 function setDataTableFileList(accountList) {
     $('#usersManagedTable').removeAttr('width').DataTable({
         data: accountList,
@@ -289,11 +285,6 @@ $('#principalsFilesSelect').click((e) => {
     }    
 });
 
-function isEmail(email) {
-    let regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-    return regex.test(email);
-}
-
 function setIconAction(data) {
     let iconCell = "";
     let openIcon = `<i id="${data.toString()}" action="open" data-toggle="modal" data-target="#exampleModalLong" class="ml-2 fa-solid fa-book-open fa-xl open-doc pointer" title="Abrir documento"></i>`;
@@ -315,28 +306,3 @@ $(document).ready(function () {
     $("#embedPDF").attr("hidden", true);
     $("#PrincipalFilesTable").attr("hidden", true);    
 });
-
-var translation = {
-    "sProcessing": "Processando...",
-    "sLengthMenu": "Mostrar _MENU_ registros",
-    "sZeroRecords": "Não foi encontrado resultados",
-    "sEmptyTable": "Nenhum documento salvo",
-    "sInfo": "Mostrando registros de _START_ até _END_ de um total de _TOTAL_ registros",
-    "sInfoEmpty": "Mostrando registros de 0 até 0 de um total de 0 registros",
-    "sInfoFiltered": "(filtrado de um total de _MAX_ registros)",
-    "sInfoPostFix": "",
-    "sSearch": "Pesquisar:",
-    "sUrl": "",
-    "sInfoThousands": ",",
-    "sLoadingRecords": "Carregando...",
-    "oPaginate": {
-        "sFirst": "Primeiro",
-        "sLast": "Ultimo",
-        "sNext": "Seguinte",
-        "sPrevious": "Anterior"
-    },
-    "oAria": {
-        "sSortAscending": ": Ativar para ordenar coluna de forma ascendente",
-        "sSortDescending": ": Ativar para ordenar coluna de forma descendente"
-    }
-}

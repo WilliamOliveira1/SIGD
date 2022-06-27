@@ -36,10 +36,12 @@ function changeReadingStatus(filename) {
         })
             .done(function (response) {
                 if (response) {
-                    console.log(response);
+                    $('#exampleModalLong').modal('hide');
+                    setMessage(response);
                 }
             })
             .fail(function (response) {
+                $('#exampleModalLong').modal('hide');
                 setErrorMessage(response.responseJSON);
             })
     })
@@ -95,7 +97,19 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
-                    return data[0]?.LastTimeOpened !== '0001-01-01T00:00:00' ? `<span class="ml-3">${data[0]?.LastTimeOpened?.toString()}</span>` : '<p class="text-center">---</p>';
+                    if (data[0]?.LastTimeOpened !== '0001-01-01T00:00:00') {
+                        var date = new Date(data[0]?.LastTimeOpened);
+                        var dateString =
+                            date.getUTCDate() + "/" +
+                            ("0" + (date.getUTCMonth() + 1)).slice(-2) + "/" +
+                            (date.getUTCFullYear()) + " " +
+                            ("0" + date.getUTCHours()).slice(-2) + ":" +
+                            ("0" + date.getUTCMinutes()).slice(-2);
+                        return `<span class="ml-3">${dateString.toString()}</span>`
+                    }
+                    else {
+                        return '<p class="text-center">---</p>';
+                    }                                         
                 },
             },
             {

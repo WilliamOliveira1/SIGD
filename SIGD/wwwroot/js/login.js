@@ -110,41 +110,6 @@ $('#ChangePasswordSubmit').click(function () {
     changePassword(firstAccessPassword, newPassword, email, username);
 });
 
-function BaseApiUrl() {
-    return window.location.origin;
-}
-
-function setErrorMessage(message) {
-    let timerInterval
-    Swal.fire({
-        title: 'Erro!',
-        text: message,
-        icon: 'error',
-        confirmButtonText: 'Fechar',
-        showCloseButton: true,
-        timer: 5000,
-        timerProgressBar: true,
-        willClose: () => {
-            clearInterval(timerInterval)
-        }
-    })
-}
-
-function setMessage(message) {
-    let timerInterval
-    Swal.fire({
-        title: 'Sucesso!',
-        text: message,
-        confirmButtonText: 'Fechar',
-        showCloseButton: true,
-        timer: 5000,
-        timerProgressBar: true,
-        willClose: () => {
-            clearInterval(timerInterval)
-        }
-    })
-}
-
 $("#InputCheckNewPassword, #InputNewPassword, #InputFirstAccessPassword").on('input', function () {
     changePasswordForm();
 });
@@ -206,11 +171,6 @@ function loginForm() {
             $("#LoginSubmit").prop("disabled", false);
         }
     }
-}
-
-function isEmail(email) {
-    let regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-    return regex.test(email);
 }
 
 $(document).ready(function () {

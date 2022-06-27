@@ -61,7 +61,7 @@
                 else {
                     message = responseJson
                 }                
-                setMessage(message, status);
+                setMessageWithStatus(message, status);
             })
             .catch((error) => {
                 console.log(error)
@@ -204,10 +204,7 @@
             })
                 .done(function (response) {
                     if (response) {
-                        setMessage(response);
-                    }
-                    else {
-
+                        setMessageWithStatus(response);
                     }
                 })
                 .fail(function (response) {
@@ -218,48 +215,5 @@
     
     var haveFile = false;
     var havePrincipal = false;
-    $("#fileSubmit").prop('disabled', true);    
-
-    function setMessage(message, status) {
-        let title = status ? "Sucesso!" : "Erro!";
-        let icon = status ? "success" : "error";        
-        let str = "";
-        console.log(typeof message);
-        
-        if (typeof message === "object") {
-            message.forEach((e) => {
-                str = str + e;
-            });
-        }
-        else {
-            str = message;
-        }
-        
-
-        let timerInterval = str.length * 50 > 5000 ? str.length * 50 : 5000;
-        console.log(timerInterval);
-        Swal.fire({
-            customClass: {
-                popup: 'format-pre'
-            },
-            title: title,
-            icon: icon,
-            html: '<span>' + str + '</span>',
-            customClass: 'swal-wide',
-            confirmButtonText: 'Fechar',
-            showCloseButton: true,
-            timer: timerInterval,
-            timerProgressBar: true,
-            willClose: () => {
-                clearInterval(timerInterval)
-                window.location.reload();
-            }
-        })
-    }
+    $("#fileSubmit").prop('disabled', true);
 });
-
-function isEmailValid(email) {    
-    let EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
-    let isValid = EMAIL_REGEX.test(email);
-    return isValid;
-}

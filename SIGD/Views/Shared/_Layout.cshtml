@@ -81,7 +81,6 @@
     <script src="https://kit.fontawesome.com/41ca5971b4.js" crossorigin="anonymous"></script>
     @if (SignInManager.IsSignedIn(User))
     {
-        <script src="~/js/site.js" asp-append-version="true"></script>
         @if (@Model?.role == Role.Administrator)
         {
             <script src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
@@ -94,6 +93,7 @@
         }
         <script src="~/js/datatables.min.js" asp-append-version="true"></script>
     }
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

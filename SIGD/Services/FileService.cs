@@ -65,7 +65,6 @@ namespace SIGD.Services
                             foreach (var principalEmail in usersToRead)
                             {
                                 var principalAccount = listOfPrincipals.Where(x => x.Email == principalEmail).FirstOrDefault();
-                                principalAccount = databaseAccountService.GetActivationAccountByEmail(principalEmail.ToLower());
                                 PrincipalFileModelView fileModelView = new PrincipalFileModelView()
                                 {
                                     PrincipalName = principalAccount.UserName,

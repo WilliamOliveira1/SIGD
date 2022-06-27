@@ -49,6 +49,12 @@
                                     <a class="nav-link text-dark" id="fileManagementTab" asp-area="" asp-controller="Home" asp-action="FilesList">Lista de documentos</a>
                                 </li>
                             }
+                            @if (@Model?.role == Role.Principal)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" id="fileManagementTab" asp-area="" asp-controller="Home" asp-action="PrincipalFilesList">Lista de documentos</a>
+                                </li>
+                            }
                         }
                     </ul>
                 </div>
@@ -81,6 +87,10 @@
             <script src="~/js/createPrincipalUser.js" asp-append-version="true"></script>
             <script src="~/js/fileManager.js" asp-append-version="true"></script>
             <script src="~/js/filesList.js" asp-append-version="true"></script>
+        }
+        @if (@Model?.role == Role.Principal)
+        {
+            <script src="~/js/principalFilesList.js" asp-append-version="true"></script>
         }
         <script src="~/js/datatables.min.js" asp-append-version="true"></script>
     }

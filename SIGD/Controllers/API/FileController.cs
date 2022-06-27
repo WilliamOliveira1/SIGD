@@ -104,13 +104,47 @@ namespace SIGD.Controllers.API
         {
             try
             {
-                string useremail = input?["useremail"]?.ToString(); ;
+                string useremail = input?["useremail"]?.ToString();
                 var files = fileService.GetFilesByPrincipalUsername(useremail);
                 return Ok(JsonConvert.SerializeObject(files, Formatting.None,
                         new JsonSerializerSettings()
                         {
                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                         }));
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Process Error: {e.Message}"); // Oops!
+            }
+        }
+
+        [HttpPost("getfilesbyprincipalUsername")]
+        public ActionResult GetFilesbyPrincipalUsername([FromBody] JObject input)
+        {
+            try
+            {
+                string useremail = input?["username"]?.ToString();
+                var files = fileService.GetFilesByPrincipalUsername(useremail);
+                return Ok(JsonConvert.SerializeObject(files, Formatting.None,
+                        new JsonSerializerSettings()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }));
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Process Error: {e.Message}"); // Oops!
+            }
+        }
+
+        [HttpPost("changeReadingStatus")]
+        public ActionResult ChangeReadingStatus([FromBody] JObject input)
+        {
+            try
+            {
+                string filename = input?["filename"]?.ToString();
+                var status = fileService.ChangeReadingStatus(filename);
+                return Ok(status);
             }
             catch (Exception e)
             {

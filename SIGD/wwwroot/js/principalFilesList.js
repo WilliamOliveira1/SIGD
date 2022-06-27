@@ -1,28 +1,8 @@
-﻿function getUsersList() {    
-    let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyuser";
-
-    return new Promise(function (resolve, reject) {
-        $.get({
-            url: apiPath,
-            contentType: 'application/json'
-        })
-            .done(function (response) {
-                if (response) {
-                    let obj = JSON.parse(response)
-                    setDataTableFileList(obj);//Create method to load table with users
-                }
-            })
-            .fail(function (response) {
-                setErrorMessage(response.responseJSON);
-            })
-    })
-}
-
-function getPrincipalFilesList(principalEmail) {
+﻿function getPrincipalFilesList(username) {
     let parameters = {
-        'useremail': principalEmail,
+        'username': username,
     };
-    let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyprincipal";
+    let apiPath = BaseApiUrl() + "/api/filemanager/getfilesbyprincipalUsername";
 
     return new Promise(function (resolve, reject) {
         $.post({
@@ -42,65 +22,46 @@ function getPrincipalFilesList(principalEmail) {
     })
 }
 
+function changeReadingStatus(filename) {
+    let parameters = {
+        'filename': filename,
+    };
+    let apiPath = BaseApiUrl() + "/api/filemanager/changeReadingStatus";
+
+    return new Promise(function (resolve, reject) {
+        $.post({
+            url: apiPath,
+            contentType: 'application/json',
+            data: JSON.stringify(parameters)
+        })
+            .done(function (response) {
+                if (response) {
+                    console.log(response);
+                }
+            })
+            .fail(function (response) {
+                setErrorMessage(response.responseJSON);
+            })
+    })
+}
+
 function BaseApiUrl() {
     return window.location.origin;
 }
 
-function setDataTableFileList(accountList) {
-    $('#usersManagedTable').removeAttr('width').DataTable({
-        data: accountList,
-        responsive: true,
-        "language": translation,
-        "columnDefs": [
-            { "class": "dt-head-center", "targets": 0 },
-            { "width": "200px", "class": "dt-head-center", "targets": 1 },
-            { "class": "dt-head-center", "targets": 2 }
-        ],        
-        columns: [
-            {
-                data: 'FileName',
-                render: function (data, type) {
-                    return type === 'display' ? '<span class="ml-3">' + data?.toString() + '</span>' : data;
-                },
-            },
-            {
-                data: 'PrincipalsFiles',
-                render: function (data, type) {
-                    let i = 1;
-                    let select = `<select id="readerList" class="mt-2">`;
-                    let option = "";
-                    data.forEach((e) => {
-                        option = `<option value="position${i}">${e.PrincipalEmail}</option>`
-                        select = select + option;
-                        option = "";
-                        i++;
-                    });
-                    select.concat("</select>");
-                    return type === 'display' ? select : data;
-                },
-            },
-            {
-                data: 'FileName',
-                render: function (data, type) {
-                    return setIconAction(data);
-                },
-            }
-        ]
-    });    
-}
-
 function setDataTablePrincipalsFilesList(accountList) {
-    $('#PrincipalFilesTable').DataTable({
+    let addNumber = 0;
+    table = $('#PrincipalFilesTableData').DataTable({
         data: accountList,
         "language": translation,
         autoWidth: false,
         "columnDefs": [
-            { "width": "150px", "class": "dt-head-center", "targets": 0 },
-            { "width": "190px", "class": "dt-head-center","targets": 1 },
-            { "width": "190px", "class": "dt-head-center","targets": 2 },
-            { "width": "80px", "class": "dt-head-center","targets": 3 },
-            { "width": "190px", "class": "dt-head-center","targets": 4 },
-            { "width": "120px", "class": "dt-head-center","targets": 5 },
+            { "width": "350px", "class": "dt-head-center", "targets": 0 },
+            { "width": "80px", "class": "dt-head-center", "targets": 1 },
+            { "width": "80px", "class": "dt-head-center", "targets": 2 },
+            { "width": "80px", "class": "dt-head-center", "targets": 3 },
+            { "width": "190px", "class": "dt-head-center", "targets": 4 },
+            { "width": "120px", "class": "dt-head-center", "targets": 5 },
         ],
         responsive: true,
         "ordering": false,
@@ -114,7 +75,9 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
-                    return data[0]?.Question ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer"></i>` : `<p class="text-center" title="Não tem pergunta.">---</p>`;
+                    let renderCell = data[0]?.Question ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer"></i>` : `<i id="question${addNumber}" class="fa-solid fa-clipboard-question fa-xl pointer ml-4 open-question"></i>`;
+                    addNumber++;
+                    return renderCell;
                 },
             },
             {
@@ -155,14 +118,35 @@ $('#tableElement tbody').on('click', '.write-answer', (e) => {
 });
 
 $('#tableElement tbody').on('click', '.open-doc', (e) => {
-    let filename = e.currentTarget.attributes[0].nodeValue;
+    let filename = e.currentTarget.attributes[2].nodeValue;
     let test = filename.includes("pdf");
+    let id = e.currentTarget.attributes[0].nodeValue;
+    let row = $(`#${id}`).parents('tr')[0];
+    let rowData = table.row(row).data();
+    let status = rowData.PrincipalsFiles[0].Status
     if (test) {
-        openPDFFile(filename);
+        openPDFFile(filename, status);
     }
     else {
-        openFile(filename);
+        openFile(filename, status);
     }
+});
+
+$('#tableElement tbody').on('click', '.open-question', (e) => {
+    $("#modalMessageButton").click();
+    let buttonConfirm = `<button id="sendQuestion" type="button" class="btn btn-primary">Enviar pergunta</button>`;
+    let id = e.currentTarget.attributes[0].nodeValue;
+    let row = $(`#${id}`).parents('tr')[0];
+    let rowData = table.row(row).data();
+    $("#modalQAFooter").append(buttonConfirm);
+    $("#ModalQALongTitle").empty();
+    $("#ModalQALongTitle").text(`Enviar pergunta arquivo - ${rowData.FileName}`);
+});
+
+$('#exampleModalLong').on('click', '#confirmReadingStatus', (e) => {
+    let modalTitle = $("#exampleModalLongTitle");
+    let filename = modalTitle[0].innerHTML;
+    changeReadingStatus(filename)
 });
 
 function downloadFile(filename) {
@@ -203,7 +187,7 @@ function downloadFile(filename) {
     })
 }
 
-function openPDFFile(filename) {
+function openPDFFile(filename, status) {
     let parameters = {
         'filename': filename,
     };
@@ -220,17 +204,20 @@ function openPDFFile(filename) {
         })
             .done(function (response) {
                 if (response) {
-                    $(".modal-body").empty();
-                    $(".modal-body").append(`<embed id="embedPDF" width="750" height="1000">`);
+                    $("#modalFile").empty();
+                    $("#modalFile").append(`<embed id="embedPDF" width="750" height="1000">`);
                     let fileName = parameters.filename;
                     let type = response.type;
                     let file1 = blobToFile(response, fileName)
                     if (type === "application/pdf") {
                         var fileURL = URL.createObjectURL(file1);
-                        $("#embedPDF").attr("src", fileURL);                        
+                        $("#embedPDF").attr("src", fileURL);
                         $("#embedPDF").attr("hidden", false);
                     }
                     $("#exampleModalLongTitle").html(filename);
+                    if (!status) {
+                        $("#modalFileFooter").append(`<button id="confirmReadingStatus" type="button" class="btn btn-primary">Confirmar leitura</button>`);
+                    }
                     $("#modalButton").click();
                 }
             })
@@ -240,7 +227,16 @@ function openPDFFile(filename) {
     })
 }
 
-function openFile(filename) {
+//Execute hen modal is closed by any means
+$('#exampleModalLong').on('hide.bs.modal', (e) => {
+    $("#confirmReadingStatus").remove();
+});
+
+$('#exampleModalMessageLong').on('hide.bs.modal', (e) => {
+    $("#sendQuestion").remove();
+});
+
+function openFile(filename, status) {
     let parameters = {
         'filename': filename,
     };
@@ -254,10 +250,13 @@ function openFile(filename) {
         })
             .done(function (response) {
                 if (response) {
-                    $(".modal-body").empty();
+                    $("#modalFile").empty();
                     $("#embedPDF").attr("hidden", true);
-                    $(".modal-body").append(response);
+                    $("#modalFile").append(response);
                     $("#exampleModalLongTitle").html(filename);
+                    if (!status) {
+                        $("#modalFileFooter").append(`<button id="confirmReadingStatus" type="button" class="btn btn-primary">Confirmar leitura</button>`);
+                    }
                     $("#modalButton").click();
                 }
             })
@@ -276,7 +275,7 @@ $('#principalsFilesSelect').click((e) => {
     let optionSelected = conceptName[0].innerHTML;
     let isEmailSelected = isEmail(optionSelected);
     $("#PrincipalFilesTable").DataTable().clear().destroy();
-    $("#usersManagedTable").DataTable().clear().destroy();    
+    $("#usersManagedTable").DataTable().clear().destroy();
     if (isEmailSelected) {
         $("#PrincipalFilesTable").attr("hidden", false);
         $("#usersManagedTable").attr("hidden", true);
@@ -286,7 +285,7 @@ $('#principalsFilesSelect').click((e) => {
         $("#PrincipalFilesTable").attr("hidden", true);
         $("#usersManagedTable").attr("hidden", false);
         getUsersList();
-    }    
+    }
 });
 
 function isEmail(email) {
@@ -296,7 +295,8 @@ function isEmail(email) {
 
 function setIconAction(data) {
     let iconCell = "";
-    let openIcon = `<i id="${data.toString()}" action="open" data-toggle="modal" data-target="#exampleModalLong" class="ml-2 fa-solid fa-book-open fa-xl open-doc pointer" title="Abrir documento"></i>`;
+    let fileWithoutExt = data.toString().split(".");
+    let openIcon = `<i id="${fileWithoutExt[0]}" action="open" data-name="${data.toString()}" data-toggle="modal" data-target="#exampleModalLong" class="ml-2 fa-solid fa-book-open fa-xl open-doc pointer" title="Abrir documento"></i>`;
     let downloadIcon = `<i id="${data.toString()}" action="download" class="ml-2 fa-solid fa-download fa-xl download-doc pb-2 pointer" title="Download do documento"></i>`;
     iconCell = iconCell + openIcon;
     iconCell = iconCell + downloadIcon;
@@ -305,17 +305,17 @@ function setIconAction(data) {
 }
 
 function setStatusIcon(data) {
-    return data[0]?.Status ? `<i class="fa-regular fa-circle-check ml-3 fa-beat fa-xl pointer" title="Documento lido"></i>` : `<i class="fa-solid fa-circle-exclamation ml-3 fa-beat fa-xl pointer" title="Documento não lido"></i>`;
+    return data[0]?.Status ? `<i class="fa-regular fa-circle-check ml-3 fa-xl pointer" title="Documento lido"></i>` : `<i class="fa-solid fa-circle-exclamation ml-3 fa-beat fa-xl pointer" title="Documento não lido"></i>`;
 }
 
 $(document).ready(function () {
     if (window.location.href.indexOf("FilesList") > -1) {
-        getUsersList();
+        let username = $('.username').attr('id');
+        getPrincipalFilesList(username);
     }
-    $("#embedPDF").attr("hidden", true);
-    $("#PrincipalFilesTable").attr("hidden", true);    
+    $("#embedPDF").attr("hidden", true);    
 });
-
+var table = null;
 var translation = {
     "sProcessing": "Processando...",
     "sLengthMenu": "Mostrar _MENU_ registros",

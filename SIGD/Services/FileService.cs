@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 
 namespace SIGD.Services
 {
@@ -63,7 +64,8 @@ namespace SIGD.Services
 
                             foreach (var principalEmail in usersToRead)
                             {
-                                ActivationAccount principalAccount = listOfPrincipals.Where(x => x.Email == principalEmail).FirstOrDefault();
+                                var principalAccount = listOfPrincipals.Where(x => x.Email == principalEmail).FirstOrDefault();
+                                principalAccount = databaseAccountService.GetActivationAccountByEmail(principalEmail.ToLower());
                                 PrincipalFileModelView fileModelView = new PrincipalFileModelView()
                                 {
                                     PrincipalName = principalAccount.UserName,
@@ -122,12 +124,45 @@ namespace SIGD.Services
             return null;
         }
 
-        public List<PrincipalFileModelView> GetFilesByPrincipalUsername(string email)
+        public List<FileModel> GetFilesByPrincipalUsername(string email)
         {
             try
-            {        
+            {
+                List<FileModel> fileModels = new List<FileModel>();
                 List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
-                filesViewModel = filesViewModel.Where(x => x.PrincipalEmail == email).ToList();
+                var completeList = databaseService.GetAllFiles().ToList();
+                if (IsValidEmail(email))
+                {
+                    fileModels = completeList.Where(x => x.PrincipalsFiles.All(y => y.PrincipalEmail == email)).ToList();
+                }
+                else
+                {
+                    fileModels = completeList.Where(x => x.PrincipalsFiles.All(y => y.PrincipalName == email)).ToList();
+                }
+                
+                return fileModels;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return null;
+        }
+
+        public List<PrincipalFileModelView> GetFilesByPrincipalUsername1(string email)
+        {
+            try
+            {
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                if (IsValidEmail(email))
+                {
+                    filesViewModel = filesViewModel.Where(x => x.PrincipalEmail == email).ToList();
+                }
+                else
+                {
+                    filesViewModel = filesViewModel.Where(x => x.PrincipalName == email).ToList();
+                }
+
                 var test = databaseService.GetAllFiles().ToList();
                 List<PrincipalFileModelView> test1 = new List<PrincipalFileModelView>();
                 foreach (var t in test)
@@ -159,6 +194,26 @@ namespace SIGD.Services
                 string message = ex.Message;
             }
             return null;
+        }
+
+        public bool ChangeReadingStatus(string filename)
+        {
+            bool saveStatus = false;
+            DateTime dateTime = DateTime.Now;
+            try
+            {
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                var test = databaseService.GetAllFiles().Where(x => x.FileName == filename).ToList();
+                var fileModelView = filesViewModel.Where(x => x.FileModel.FileName == filename).FirstOrDefault();
+                fileModelView.Status = true;
+                fileModelView.LastTimeOpened = dateTime;
+                saveStatus = fileViewModeldatabaseRepository.Save(fileModelView);
+            }
+            catch (Exception)
+            {
+
+            }
+            return saveStatus;
         }
 
         public string GetContentType(string path)
@@ -202,6 +257,20 @@ namespace SIGD.Services
                 "application/pdf",
                 "application/octet-stream",
             };
-        }     
+        }
+
+        private bool IsValidEmail(string emailaddress)
+        {
+            try
+            {
+                MailAddress m = new MailAddress(emailaddress);
+
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
     }
 }

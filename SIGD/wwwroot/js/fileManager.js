@@ -12,9 +12,10 @@
         let $emails = [];
         let listTag = $("#listSelected");
         listTag[0].childNodes.forEach((e) => {
-            if (e.nextSibling) {
-                $emails.push(e.nextSibling.innerText);
-            }                        
+            if (e.nextSibling?.innerText) {
+                $emails.push(e.nextSibling.innerText.replace(/ /g, ''));
+                console.log($emails);
+            }
         });
 
         // add all selected files
@@ -97,7 +98,8 @@
     $('#principalsSelect').click((e) => {
         let conceptName = $('#principalsList').find(":selected");
         let email = conceptName[0].label;
-        let value = conceptName[0].attributes[0].value;        
+        let value = conceptName[0].attributes[0].value;
+        let numberAdd = 0;
         if (value === "0") {
             $("#principalsList option").each(function () {
                 if (this.value === "0") {
@@ -106,17 +108,29 @@
                 else
                 {
                     $(`#principalsList option[value=${this.value}]`).remove();
-                    $("#listSelected").append(`<div><span id="${this.value}" class="principalEmail">${this.innerHTML}</span></div>`);
+                    $("#listSelected").append(`
+                            <div id="principalSelect${numberAdd}">
+                                <span id="${this.value}" class="principalEmail">${this.innerHTML}</span>
+                                <i id="delPrincipal${numberAdd}" class="fa-regular fa-circle-xmark pointer removePrincipalSelect" title="remover"></i>
+                            </div>`
+                    );
                     havePrincipal = true;
+                    numberAdd++;
                 }
             });
         }
         else {
             $(`#principalsList option[value=${value}]`).remove();
-            $("#listSelected").append(`<h6 id="${value}">${email}</h6>`);
+            $("#listSelected").append(`
+                            <div id="principalSelect${numberAdd}">
+                                <span id="${value}" class="principalEmail">${email}</span>
+                                <i id="delPrincipal${numberAdd}" class="fa-regular fa-circle-xmark pointer removePrincipalSelect" title="remover"></i>
+                            </div>`
+            );
             havePrincipal = true;
+            numberAdd++;
         }
-
+        
         $("#selectedListTitle").empty();
         $("#selectedListTitle").append("<h6>Escolas selecionadas:</h6>");
 
@@ -136,6 +150,24 @@
                 }
             });
         }
+
+        $(".removePrincipalSelect").click((e) => {
+            let test = e.delegateTarget.id
+            let test1 = $(`#${test}`).parent();
+            let id = test1[0].childNodes[1].id
+            let email = test1[0].childNodes[1].innerHTML
+            let listCount = $('#principalsList option').length;
+            if (listCount === 0) {
+                $("#schoolsAdd").attr("hidden", true);
+                $('#principalsList').append($('<option></option>').val(id).text(email));
+            }
+            else {
+                $('#principalsList').append($('<option></option>').val(id).text(email));
+            }
+            
+            $("#schoolsAdd").attr("hidden", false);
+            $(`#${test1[0].id}`).remove();
+        });
 
         e.preventDefault();
     });
@@ -186,7 +218,7 @@
     
     var haveFile = false;
     var havePrincipal = false;
-    $("#fileSubmit").prop('disabled', true);
+    $("#fileSubmit").prop('disabled', true);    
 
     function setMessage(message, status) {
         let title = status ? "Sucesso!" : "Erro!";
@@ -225,3 +257,9 @@
         })
     }
 });
+
+function isEmailValid(email) {    
+    let EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+    let isValid = EMAIL_REGEX.test(email);
+    return isValid;
+}

@@ -52,6 +52,12 @@ namespace SIGD.Controllers
         }
 
         [Authorize]
+        public IActionResult PrincipalFilesList()
+        {
+            return View(GetUser());
+        }
+
+        [Authorize]
         public IActionResult CreateUser()
         {
             return View(GetUser());

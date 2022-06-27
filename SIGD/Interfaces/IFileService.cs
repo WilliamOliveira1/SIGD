@@ -13,9 +13,11 @@ namespace SIGD.Interfaces
 
         List<FileModel> GetFiles();
 
-        List<PrincipalFileModelView> GetFilesByPrincipalUsername(string username);
+        List<PrincipalFileModelView> GetFilesByPrincipalUsername1(string username);
+        List<FileModel> GetFilesByPrincipalUsername(string username);
 
         List<FileModel> GetFilesBySupervisorUsername(string username);
+        bool ChangeReadingStatus(string filename);
 
         string GetContentType(string path);
 

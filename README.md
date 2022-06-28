@@ -1,2 +1,2 @@
 # SIGD
-PI II - Sistema de integração e gerenciamento de documentos  - SIGD
+PI - Sistema de integração e gerenciamento de documentos  - SIGD

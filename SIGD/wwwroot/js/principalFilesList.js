@@ -132,11 +132,11 @@ function setDataTablePrincipalsFilesList(accountList) {
                     if (data[0]?.LastTimeOpened !== '0001-01-01T00:00:00') {
                         var date = new Date(data[0]?.LastTimeOpened);
                         var dateString =
-                            date.getUTCDate() + "/" +
+                            date.getDate() + "/" +
                             ("0" + (date.getUTCMonth() + 1)).slice(-2) + "/" +
                             (date.getUTCFullYear()) + " " +
-                            ("0" + date.getUTCHours()).slice(-2) + ":" +
-                            ("0" + date.getUTCMinutes()).slice(-2);
+                            ("0" + date.getHours()).slice(-2) + ":" +
+                            ("0" + date.getMinutes()).slice(-2);
                         return `<span class="ml-3">${dateString.toString()}</span>`
                     }
                     else {
@@ -203,7 +203,7 @@ $('#tableElement tbody').on('click', '.open-doc', (e) => {
     }
 });
 
-$('#tableElement tbody').on('click', '.open-question', (e) => {
+$('#tableElement tbody').on('click', '.open-question', (e) => {    
     $("#modalMessageButton").click();
     let buttonConfirm = `<button id="sendQuestion" type="button" class="btn btn-primary">Enviar pergunta</button>`;
     let id = e.currentTarget.attributes[0].nodeValue;
@@ -297,6 +297,7 @@ function openPDFFile(filename, status) {
             .done(function (response) {
                 if (response) {
                     $("#modalFile").empty();
+                    $("#exampleModalLongTitle").empty();
                     $("#modalFile").append(`<embed id="embedPDF" width="750" height="1000">`);
                     let fileName = parameters.filename;
                     let type = response.type;
@@ -343,7 +344,12 @@ function openFile(filename, status) {
             .done(function (response) {
                 if (response) {
                     $("#modalFile").empty();
+                    $("#exampleModalLongTitle").empty();
                     $("#embedPDF").attr("hidden", true);
+                    response = response.replaceAll("<", "");
+                    response = response.replaceAll(">", "");
+                    response = response.replaceAll("</", "");
+                    response = response.replaceAll("/", "");
                     $("#modalFile").append(response);
                     $("#exampleModalLongTitle").html(filename);
                     if (!status) {

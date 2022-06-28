@@ -101,3 +101,14 @@ function isEmail(email) {
     let regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
     return regex.test(email);
 }
+
+String.prototype.replaceAll = function (stringToFind, stringToReplace) {
+    if (stringToFind === stringToReplace) return this;
+    var temp = this;
+    var index = temp.indexOf(stringToFind);
+    while (index != -1) {
+        temp = temp.replace(stringToFind, stringToReplace);
+        index = temp.indexOf(stringToFind);
+    }
+    return temp;
+};

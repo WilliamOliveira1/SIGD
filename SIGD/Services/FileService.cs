@@ -199,18 +199,21 @@ namespace SIGD.Services
         {
             bool saveStatus = false;
             DateTime dateTime = DateTime.Now;
+            string fusoHorarioId = "E. South America Standard Time";
+            TimeZoneInfo Standard_Time = TimeZoneInfo.FindSystemTimeZoneById(fusoHorarioId);
+            DateTime dataHoraLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, Standard_Time);
             try
             {
                 List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
                 var test = databaseService.GetAllFiles().Where(x => x.FileName == filename).ToList();
                 var fileModelView = filesViewModel.Where(x => x.FileModel.FileName == filename).FirstOrDefault();
                 fileModelView.Status = true;
-                fileModelView.LastTimeOpened = dateTime;
+                fileModelView.LastTimeOpened = dataHoraLocal;
                 saveStatus = fileViewModeldatabaseRepository.Save(fileModelView);
             }
             catch (Exception)
             {
-
+                saveStatus = false;
             }
             return saveStatus;
         }

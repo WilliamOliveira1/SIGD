@@ -21,6 +21,10 @@ namespace SIGD.Interfaces
         bool SaveFileQuestion(string filename, string message);
         bool SaveFileAnswer(string filename, string message);
 
+        List<Tuple<string, List<PrincipalFileModelView>>> GetDataChart(string username);
+
+        List<Tuple<string, List<PrincipalFileModelView>>> GetDataChartPrincipal(string username);
+
         string GetContentType(string path);
 
         Dictionary<string, string> GetMimeTypes();

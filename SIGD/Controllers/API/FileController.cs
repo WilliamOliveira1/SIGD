@@ -175,6 +175,60 @@ namespace SIGD.Controllers.API
             }
         }
 
+        [HttpGet("getDataChart")]
+        public ActionResult GetDataChart()
+        {
+            try
+            {
+                string username = User.Identity.Name;
+                var dataChart = fileService.GetDataChart(username);
+                if(dataChart != null)
+                {
+                    return Ok(JsonConvert.SerializeObject(dataChart, Formatting.None,
+                        new JsonSerializerSettings()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }));
+                }
+                else
+                {
+                    return BadRequest($"{SharedMessages.ERROR_GET_CHART_DATA}");
+                }
+                
+            }
+            catch (Exception)
+            {
+                return BadRequest($"{SharedMessages.ERROR_GET_CHART_DATA}");
+            }
+        }
+
+        [HttpGet("getDataChartPrincipal")]
+        public ActionResult GetDataChartPrincipal()
+        {
+            try
+            {
+                string username = User.Identity.Name;
+                var dataChart = fileService.GetDataChartPrincipal(username);
+                if (dataChart != null)
+                {
+                    return Ok(JsonConvert.SerializeObject(dataChart, Formatting.None,
+                        new JsonSerializerSettings()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }));
+                }
+                else
+                {
+                    return BadRequest($"{SharedMessages.ERROR_GET_CHART_DATA}");
+                }
+
+            }
+            catch (Exception)
+            {
+                return BadRequest($"{SharedMessages.ERROR_GET_CHART_DATA}");
+            }
+        }
+
         [HttpPost("sendFileAnswer")]
         public ActionResult SendFileAnswer([FromBody] JObject input)
         {

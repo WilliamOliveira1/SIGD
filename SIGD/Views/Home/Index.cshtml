@@ -1,8 +1,27 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@model SIGD.Models.ActivationAccount;
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Bem vindo ao SIGD.</h1>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <span>Ola @User.Identity.Name! confira a lista de documentos na "Lista de documentos"</span>
+    }
+    @if (!SignInManager.IsSignedIn(User))
+    {
+        <div>
+            <span>Ola se você é supervisor por favor crie a sua conta em "Cadastrar"</span>
+        </div>
+        <div>
+            <span>Após isso confirme seu cadastro.</span>
+        </div>
+        <div>
+            <span class="mt-5">Ou se ja é cadastrado por favor clique em "Acessar".</span>
+        </div>
+    }
 </div>

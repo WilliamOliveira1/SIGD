@@ -127,18 +127,34 @@ namespace SIGD.Services
         {
             try
             {
-                List<FileModel> fileModels = new List<FileModel>();
-                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
-                var completeList = databaseService.GetAllFiles().ToList();
+                ActivationAccount user = new ActivationAccount();
                 if (IsValidEmail(email))
                 {
-                    fileModels = completeList.Where(x => x.PrincipalsFiles.All(y => y.PrincipalEmail == email)).ToList();
+                    user = databaseAccountService.GetActivationAccountByEmail(email);
                 }
                 else
                 {
-                    fileModels = completeList.Where(x => x.PrincipalsFiles.All(y => y.PrincipalName == email)).ToList();
+                    user = databaseAccountService.GetActivationAccountByUserName(email);
                 }
                 
+                List<SupervisorFileModelView> supervisorFileModelView = new List<SupervisorFileModelView>();                
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                filesViewModel = filesViewModel.Where(x => x.SupervisorName == user.UserName).ToList();                
+                List<FileModel> fileModels = new List<FileModel>();
+
+                var allFiles = databaseService.GetAllFiles().ToList();
+                List<PrincipalFileModelView> principalFilesData = new List<PrincipalFileModelView>();
+                foreach (var file in allFiles)
+                {
+                    principalFilesData.AddRange(file.PrincipalsFiles);
+                }
+
+                principalFilesData = principalFilesData.Where(x => x.PrincipalName == user.UserName).ToList();
+                foreach (var file in principalFilesData)
+                {
+                    fileModels.Add(file.FileModel);
+                }
+
                 return fileModels;
             }
             catch (Exception ex)
@@ -187,6 +203,71 @@ namespace SIGD.Services
                 filesViewModel = filesViewModel.Where(x => x.SupervisorName == user.UserName).ToList();
                 var test = databaseService.GetAllFiles().Where(x => x.UserUpload == user).ToList();
                 return test;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return null;
+        }
+
+        public List<Tuple<string, List<PrincipalFileModelView>>> GetDataChart(string username)
+        {
+            try
+            {
+                List<string> principalsName = new List<string>();
+                List<SupervisorFileModelView> supervisorFileModelView = new List<SupervisorFileModelView>();
+                ActivationAccount user = databaseAccountService.GetActivationAccountByUserName(username);
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                filesViewModel = filesViewModel.Where(x => x.SupervisorName == user.UserName).ToList();
+                List<ActivationAccount> principalsAccounts = databaseAccountService.GetAllPrincipalsAccountsByAdmin(username);
+                List<Tuple<string, List<PrincipalFileModelView>>> principalsViewModel = new List<Tuple<string, List<PrincipalFileModelView>>>();
+
+                var allFiles = databaseService.GetAllFiles().ToList();
+                List<PrincipalFileModelView> principalFilesData = new List<PrincipalFileModelView>();
+                foreach (var file in allFiles)
+                {
+                    principalFilesData.AddRange(file.PrincipalsFiles);
+                }
+                
+
+                foreach (var principal in principalsAccounts)
+                {
+                    principalsName.Add(principal.UserName);
+                }
+                //filesViewModel.Where(x => x.PrincipalName == name).ToList()
+                foreach (var name in principalsName)
+                {
+                    principalsViewModel.Add(new Tuple<string, List<PrincipalFileModelView>>(name, principalFilesData.Where(x => x.PrincipalName == name).ToList()));
+                }
+                return principalsViewModel;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return null;
+        }
+
+        public List<Tuple<string, List<PrincipalFileModelView>>> GetDataChartPrincipal(string username)
+        {
+            try
+            {
+                List<SupervisorFileModelView> supervisorFileModelView = new List<SupervisorFileModelView>();
+                ActivationAccount user = databaseAccountService.GetActivationAccountByUserName(username);
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                filesViewModel = filesViewModel.Where(x => x.PrincipalName == user.UserName).ToList();
+                List<ActivationAccount> principalsAccounts = databaseAccountService.GetAllPrincipalsAccountsByAdmin(username);
+                List<Tuple<string, List<PrincipalFileModelView>>> principalsViewModel = new List<Tuple<string, List<PrincipalFileModelView>>>();
+                var allFiles = databaseService.GetAllFiles().ToList();
+
+                var filesViewModelReaded = filesViewModel.Where(x => x.Status == true).ToList();
+                var filesViewModelNotReaded = filesViewModel.Where(x => x.Status == false).ToList();
+
+                principalsViewModel.Add(new Tuple<string, List<PrincipalFileModelView>>("Não lido", filesViewModelNotReaded));
+                principalsViewModel.Add(new Tuple<string, List<PrincipalFileModelView>>("Lido", filesViewModelReaded));
+
+                return principalsViewModel;
             }
             catch (Exception ex)
             {

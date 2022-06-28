@@ -40,6 +40,12 @@ namespace SIGD.Controllers
         }
 
         [Authorize]
+        public IActionResult MainBoardPrincipal()
+        {
+            return View(GetUser());
+        }
+
+        [Authorize]
         public IActionResult FileManagementPage()
         {
             return View(GetUser());

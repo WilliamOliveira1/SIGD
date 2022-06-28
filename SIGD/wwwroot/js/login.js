@@ -24,7 +24,7 @@ function login(username, email, password) {
                     setMessage(response);
                 }
                 else {
-                    $(location).attr('href', '../../Home/MainBoard');
+                    $(location).attr('href', '../../');
                 }
                 //resolve(response);
                 //alertResponse(response);

@@ -17,5 +17,6 @@ namespace SIGD.Helper
         public const string ERROR_EMAIL_TAKEN = "Esse email ja tem uma conta.";
         public const string ERROR_SAVING_READING_STATUS = "Não foi possivel salvar o status de leitura, por favor tente novamente.";
         public const string READING_STATUS_SAVED = "Status de leitura salvo com sucesso.";
+        public const string ERROR_GET_CHART_DATA = "Erro ao coletar dados para o grafico, por favor tente novamente depois.";
     }
 }

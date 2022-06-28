@@ -33,7 +33,7 @@ function getPrincipalFilesList(principalEmail) {
             .done(function (response) {
                 if (response) {
                     let obj = JSON.parse(response)
-                    setDataTablePrincipalsFilesList(obj);//Create method to load table with users
+                    setDataTablePrincipalsFilesList(obj, principalEmail);//Create method to load table with users
                 }
             })
             .fail(function (response) {
@@ -85,7 +85,7 @@ function setDataTableFileList(accountList) {
     });    
 }
 
-function setDataTablePrincipalsFilesList(accountList) {
+function setDataTablePrincipalsFilesList(accountList, principalEmail) {
     let addNumber = 0;
     table = $('#PrincipalFilesTable').DataTable({
         data: accountList,
@@ -111,9 +111,10 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
+                    data = data.find(x => x.PrincipalEmail == principalEmail);
                     let renderCell = "";
-                    if (data[0]?.Question) {
-                        renderCell = `<i id="${data[0].Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer show-question ml-4" title="Abrir pergunta"></i>`;
+                    if (data?.Question) {
+                        renderCell = `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer write-answer show-question ml-4" title="Abrir pergunta"></i>`;
                     }
                     else {
                         renderCell = `<i id="question${addNumber}" class="fa-solid fa-clipboard-question fa-xl pointer ml-4" title="Não foi feito pergunta ainda."></i>`;
@@ -125,20 +126,23 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
+                    data = data.find(x => x.PrincipalEmail == principalEmail);
                     return editAnswerCell(data);
                 },
             },
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
+                    data = data.find(x => x.PrincipalEmail == principalEmail);
                     return setStatusIcon(data);
                 },
             },
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
-                    if (data[0]?.LastTimeOpened !== '0001-01-01T00:00:00') {
-                        var date = new Date(data[0]?.LastTimeOpened);
+                    data = data.find(x => x.PrincipalEmail == principalEmail);
+                    if (data?.LastTimeOpened !== '0001-01-01T00:00:00') {
+                        var date = new Date(data?.LastTimeOpened);
                         var dateString =
                             date.getDate() + "/" +
                             ("0" + (date.getUTCMonth() + 1)).slice(-2) + "/" +
@@ -251,11 +255,11 @@ $('#exampleModalMessageLong').on('hide.bs.modal', (e) => {
 
 function editAnswerCell(data) {
     if (data) {
-        if (data[0].Question) {
-            return data[0]?.Answer ? `<i id="${data.Id}" class="fa-regular fa-square-check fa-xl pointer ml-3 open-answer" title="Abrir a resposta."></i>` : `<i id="${data.Id}" class="fa-regular fa-circle-question fa-xl pointer ml-3 send-answer" title="Enviar resposta"></i>`;
+        if (data.Question) {
+            return data?.Answer ? `<i id="${data.Id}" class="fa-regular fa-square-check fa-xl pointer ml-3 open-answer" title="Abrir a resposta."></i>` : `<i id="${data.Id}" class="fa-regular fa-circle-question fa-xl pointer ml-3 send-answer" title="Enviar resposta"></i>`;
         }
         else {
-            return data[0]?.Answer ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer"></i>` : `<p class="text-center" title="Não tem resposta ainda.">---</p>`;
+            return data?.Answer ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer"></i>` : `<p class="text-center" title="Não tem resposta ainda.">---</p>`;
         }
     }
 }
@@ -440,7 +444,7 @@ function setIconAction(data) {
 }
 
 function setStatusIcon(data) {
-    return data[0]?.Status ? `<i class="fa-regular fa-circle-check ml-3 fa-xl pointer" title="Documento lido"></i>` : `<i class="fa-solid fa-circle-exclamation ml-3 fa-beat fa-xl pointer" title="Documento não lido"></i>`;
+    return data?.Status ? `<i class="fa-regular fa-circle-check ml-3 fa-xl pointer" title="Documento lido"></i>` : `<i class="fa-solid fa-circle-exclamation ml-3 fa-beat fa-xl pointer" title="Documento não lido"></i>`;
 }
 
 $(document).ready(function () {

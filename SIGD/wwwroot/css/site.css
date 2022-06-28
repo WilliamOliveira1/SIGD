@@ -154,14 +154,6 @@ option {
     border: none;
 }
 
-#PrincipalFilesTable_length {
-    display: none;
-}
-
-#PrincipalFilesTable_filter {
-    display: none;
-}
-
 th {
     text-align: center;
 }

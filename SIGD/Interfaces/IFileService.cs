@@ -19,6 +19,7 @@ namespace SIGD.Interfaces
         List<FileModel> GetFilesBySupervisorUsername(string username);
         bool ChangeReadingStatus(string filename);
         bool SaveFileQuestion(string filename, string message);
+        bool SaveFileAnswer(string filename, string message);
 
         string GetContentType(string path);
 

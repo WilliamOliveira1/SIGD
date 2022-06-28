@@ -117,7 +117,7 @@ function setDataTablePrincipalsFilesList(accountList) {
             {
                 data: 'PrincipalsFiles',
                 render: function (data, type) {
-                    return data[0]?.Answer ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer"></i>` : `<p class="text-center" title="Não tem resposta ainda.">---</p>`;
+                    return editAnswerCell(data);
                 },
             },
             {
@@ -153,6 +153,38 @@ function setDataTablePrincipalsFilesList(accountList) {
         ]
     });
 }
+
+function editAnswerCell(data) {
+    if (data) {
+        if (data[0].Question) {
+            return data[0]?.Answer ? `<i id="${data.Id}" class="fa-regular fa-square-check fa-xl pointer ml-3 open-answer" title="Abrir a resposta."></i>` : `<i id="${data.Id}" class="fa-regular fa-circle-question fa-xl pointer ml-3 send-answer" title="Enviar resposta"></i>`;
+        }
+        else {
+            return data[0]?.Answer ? `<i id="${data.Id}" class="fa-solid fa-person-circle-question fa-xl pointer"></i>` : `<p class="text-center" title="Não tem resposta ainda.">---</p>`;
+        }
+    }
+}
+
+$('#tableElement tbody').on('click', '.open-answer', (e) => {
+    $("#modalFile").empty();
+    $("#exampleModalLongTitle").empty();
+    let id = e.currentTarget.attributes[0].nodeValue;
+    let row = $(`#${id}`).parents('tr')[0];
+    let rowData = table.row(row).data();
+    let questionRow = rowData.PrincipalsFiles[0].Answer.split("<>:")
+    let questionLines = questionRow[1].split("-newBreakline-");
+    let questionMessage = "";
+    questionLines.forEach((e) => {
+        if (e) {
+            questionMessage = questionMessage + `<div><span id="editQuestionModal">${e}</span></div>`;
+        }
+    });
+    let questionDate = `<div class="mt-4"><span id="editQuestionModal">Resposta salva na data: ${questionRow[2].toString().split("Last Sync: ").pop()}</span></div>`;
+    $("#exampleModalLongTitle").text(questionRow[0]);
+    $("#modalFile").append(questionMessage);
+    $("#modalFile").append(questionDate);
+    $("#modalButton").click();
+});
 
 $('#tableElement tbody').on('click', '.download-doc', (e) => {
     let filename = e.currentTarget.attributes[0].nodeValue;
@@ -228,7 +260,7 @@ $('#tableElement tbody').on('click', '.edit-question', (e) => {
             questionMessage = questionMessage + `<div><span id="editQuestionModal">${e}</span></div>`;
         }
     });    
-    let questionDate = `<div><span id="editQuestionModal">Pergunta salva na data: ${questionRow[2].toString().split("Last Sync: ").pop()}</span></div>`;
+    let questionDate = `<div class="mt-4"><span id="editQuestionModal">Pergunta salva na data: ${questionRow[2].toString().split("Last Sync: ").pop()}</span></div>`;
     $("#exampleModalLongTitle").text(questionRow[0]);
     $("#modalFile").append(questionMessage);
     $("#modalFile").append(questionDate);
@@ -414,27 +446,3 @@ $(document).ready(function () {
     $("#embedPDF").attr("hidden", true);    
 });
 var table = null;
-var translation = {
-    "sProcessing": "Processando...",
-    "sLengthMenu": "Mostrar _MENU_ registros",
-    "sZeroRecords": "Não foi encontrado resultados",
-    "sEmptyTable": "Nenhum documento salvo",
-    "sInfo": "Mostrando registros de _START_ até _END_ de um total de _TOTAL_ registros",
-    "sInfoEmpty": "Mostrando registros de 0 até 0 de um total de 0 registros",
-    "sInfoFiltered": "(filtrado de um total de _MAX_ registros)",
-    "sInfoPostFix": "",
-    "sSearch": "Pesquisar:",
-    "sUrl": "",
-    "sInfoThousands": ",",
-    "sLoadingRecords": "Carregando...",
-    "oPaginate": {
-        "sFirst": "Primeiro",
-        "sLast": "Ultimo",
-        "sNext": "Seguinte",
-        "sPrevious": "Anterior"
-    },
-    "oAria": {
-        "sSortAscending": ": Ativar para ordenar coluna de forma ascendente",
-        "sSortDescending": ": Ativar para ordenar coluna de forma descendente"
-    }
-}

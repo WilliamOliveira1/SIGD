@@ -237,6 +237,25 @@ namespace SIGD.Services
             return saveStatus;
         }
 
+        public bool SaveFileAnswer(string filename, string message)
+        {
+            bool saveStatus = false;
+            DateTime dateTime = DateTime.Now;
+            try
+            {
+                List<PrincipalFileModelView> filesViewModel = fileViewModeldatabaseRepository.GetAllFilesViewModel();
+                var test = databaseService.GetAllFiles().Where(x => x.FileName == filename).ToList();
+                var fileModelView = filesViewModel.Where(x => x.FileModel.FileName == filename).FirstOrDefault();
+                fileModelView.Answer = message;
+                saveStatus = fileViewModeldatabaseRepository.Save(fileModelView);
+            }
+            catch (Exception)
+            {
+                saveStatus = false;
+            }
+            return saveStatus;
+        }
+
         public string GetContentType(string path)
         {
             try
